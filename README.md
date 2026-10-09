@@ -1,0 +1,28 @@
+# STL Niş Atölyesi
+
+GoatDesgnShop için Türkçe STL niş araştırma ve ürün aday takip uygulaması. Node.js 20+ yeterlidir; harici paket veya hesap gerekmez.
+
+## Çalıştırma
+
+```sh
+cd /workspace/etsy
+npm start
+```
+
+Sunucu 3000 portunu kullanır; `PORT` ile değiştirilebilir. `npm test` puanlama kontrollerini çalıştırır.
+
+## Kullanım
+
+1. Niş ve İngilizce Etsy arama ifadesi ekle. İlgili sonuç sayısını biliyorsan kaydet.
+2. Etsy araştırma bağlantısını aç, dijital STL ilanlarını seç. Aynı 90 günlük dönem için yorum sayısı, fiyat ve gözlem tarihini kaydet. Bilinmeyen yorumu boş bırak.
+3. En az üç yorum verili ilan ve iki mağaza olduğunda örneklem fırsat puanı oluşur. Farklı tarihler ve seçilmiş örnekler sonuçları etkiler.
+4. Telegram ürün adaylarını nişlere bağla ve durumlarını takip et.
+5. JSON yedek indir. Veriler tarayıcının localStorage alanındadır; farklı cihaz veya tarayıcı otomatik paylaşmaz.
+
+CSV başlıkları: `niche,title,shop,url,price,reviews,date`. Tarih YYYY-MM-DD, fiyat USD ve ondalık ayırıcı nokta olmalıdır. Bilinmeyen yorum boş bırakılır. Niş adı mevcut kayıtla eşleşmelidir. Hatalı aktarım kısmen uygulanmaz; yinelenen ilanlar atlanır.
+
+Canlı Etsy toplama/API entegrasyonu yoktur. Gerçek rakip ve satış verileri uydurulmaz. Yorum sayısı satış hacmi değildir; puan kârlılığı ölçmez. Uygulama hesap veya sunucu veritabanı içermez.
+
+## Tanıtım sayfasını yayımlama
+
+`docs/index.html` Etsy uygulama başvurusu için İngilizce proje tanıtımıdır; çalışan uygulama veya canlı API bağlantısı değildir. Dosyalar GitHub'a gönderildikten sonra depo Settings → Pages bölümünde "Deploy from a branch", gerçek yayımlama dalı ve `/docs` klasörünü seç. Yayımlama başarıyla tamamlanırsa beklenen adres `https://pozitifadam94-tech.github.io/etsy/` olur. Başvuruya yazmadan önce adresin açıldığını doğrula. GitHub Pages kullanılabilirliği depo görünürlüğüne ve hesap planına bağlıdır; özel depoyu kendiliğinden herkese açık yapma.

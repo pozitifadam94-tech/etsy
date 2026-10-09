@@ -32,3 +32,11 @@ Canlı Etsy toplama/API entegrasyonu yoktur. Gerçek rakip ve satış verileri u
 Niş arama, veri yeterliliği filtresi, puan/fiyat sıralama, yan yana karşılaştırma, ilan düzenleme, son silmeyi geri alma ve aday araştırma bilgileri bulunur. Etsy API durum kartı onay beklediğini gösterir; canlı bağlantı yoktur.
 
 `npm run build:pages` ile statik uygulama dosyalarını `docs/app` içine güncelle. GitHub Pages yayımlaması tamamlandığında panel `/etsy/app/` yolunda açılır. API anahtarlarını bu statik siteye ekleme; gelecekteki API bağlantısı güvenli bir sunucu gerektirir.
+
+## Ürün havuzu ve satış denemeleri
+
+Ürün adaylarına PNG/JPEG/WebP görseller eklenebilir (en fazla 5 MB); tarayıcı 640 piksele küçültüp JPEG olarak yedeğe dahil eder. Görseller cihazdaki tarayıcı depolama kotasını kullanır. Aday adını/notunu arayabilir, durumla filtreleyebilirsin.
+
+Satış denemelerinde ürün başına ilk 30/60/90 günün birikimli sonuçları ayrı tutulur; aynı dönem yeniden kaydedilirse güncellenir. Dönüşüm sipariş/görüntülenme olarak hesaplanır; sıfır görüntülenmede gösterilmez. Net tutar yalnızca gider girildiyse gelir eksi giderdir. Dönemleri toplama. Ürün veya niş silindiğinde bağlı sonuçlar silinir; son silmeyi geri al tüm bağlı kayıtları geri getirir. Eski JSON yedekleri desteklenir.
+
+Araştırma görevleri eksik örnekleri, eksik sonuç sayısını, 30 günden eski gözlemleri ve tek mağaza ağırlığını gösterir. Görevler puanın yerine geçmez. Canlı API, kullanıcı girişi ve cihazlar arası otomatik senkronizasyon henüz yoktur.

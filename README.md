@@ -26,3 +26,9 @@ Canlı Etsy toplama/API entegrasyonu yoktur. Gerçek rakip ve satış verileri u
 ## Tanıtım sayfasını yayımlama
 
 `docs/index.html` Etsy uygulama başvurusu için İngilizce proje tanıtımıdır; çalışan uygulama veya canlı API bağlantısı değildir. Dosyalar GitHub'a gönderildikten sonra depo Settings → Pages bölümünde "Deploy from a branch", gerçek yayımlama dalı ve `/docs` klasörünü seç. Yayımlama başarıyla tamamlanırsa beklenen adres `https://pozitifadam94-tech.github.io/etsy/` olur. Başvuruya yazmadan önce adresin açıldığını doğrula. GitHub Pages kullanılabilirliği depo görünürlüğüne ve hesap planına bağlıdır; özel depoyu kendiliğinden herkese açık yapma.
+
+## Geliştirilmiş arayüz
+
+Niş arama, veri yeterliliği filtresi, puan/fiyat sıralama, yan yana karşılaştırma, ilan düzenleme, son silmeyi geri alma ve aday araştırma bilgileri bulunur. Etsy API durum kartı onay beklediğini gösterir; canlı bağlantı yoktur.
+
+`npm run build:pages` ile statik uygulama dosyalarını `docs/app` içine güncelle. GitHub Pages yayımlaması tamamlandığında panel `/etsy/app/` yolunda açılır. API anahtarlarını bu statik siteye ekleme; gelecekteki API bağlantısı güvenli bir sunucu gerektirir.

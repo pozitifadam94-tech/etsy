@@ -40,3 +40,7 @@ OAuth ve gercek magaza baglantisi gelistirme ortaminda Etsy ag erisimi olmadigi 
 ## Localhost surumune gecis
 
 Once eski 127.0.0.1 panelinden Yedek indir. Yeni surum localhost adresini acar; farkli adres nedeniyle tarayici arastirma kayitlarini burada yeniden Yedek yukle ile aktar. Anahtarlari ilk defa gireceksen localhost panelini kullan. Daha once 127.0.0.1 callback ile anahtar kaydettiysen yeni formda yeniden kaydet ve Etsy yetkilendirmesini tekrarla. Gercek token alimi ve ilk senkronizasyon henuz dogrulanmadi.
+
+## Magazam urun ekrani
+
+Sol menudeki Magazam > Urunlerim, canli API snapshot'indaki aktif ilanlari gosterir. Kartlar fiyat, favori, ilan yasi, son 30/60/90 gun adetleri ve varsa gorsel icerir. Arama, satis var/yok/yeni filtreleri ve satis/yenilik/ad siralamasi kullanilabilir. Senkronizasyon sayaclari, 0 urun yanitini filtre sonucu bos listesinden ayirir. Yeni surumu ayri klasore indirip eski sunucuyu kapattiktan sonra baslat; LOCALAPPDATA altindaki baglanti dosyasi korundugu icin tekrar anahtar girmek gerekmez. Ilk guncellemeyi bekle veya Simdi guncelle kullan. Sifir urun gorursen sayaci ve magaza adini bildir; connection.json dosyasini gonderme.

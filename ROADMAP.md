@@ -4,6 +4,8 @@ Amaç: günlük işleri tek çalışma alanından incelemek; Etsy'de değişikli
 
 Tamamlandı: salt okunur Etsy ürün/satış bağlantısı, ürün görünümü, günlük öncelik ve erteleme, haftalık özet, ürün detayları/değişiklik günlüğü, paket adayları, ürün aileleri, satış–destek yükü ve açık müşteri işleri.
 
+1.4.0 ile ana akış otomatik Etsy verilerine taşındı: tek bölüm gösteren altı öğeli menü, Bugün ana ekranı, 14 günlük satış grafiği, otomatik ürün grupları, tek seçimle pazar takibi ve senkronizasyonlar arası otomatik ilan değişikliği gözlemi. Manuel ölçümlere dayanan araçlar isteğe bağlı alana alındı; önceki kayıtlar korunur. Kullanıcı tercihi: günlük kullanım için elle veri doldurma gerektirmeyen, sade ve sakin arayüz. Yeni özellikler bu tercihe göre seçilmeli; ölçüm erişilemiyorsa eksikliği görev yağmuruna çevirmemeli.
+
 Sıradaki aşamalar:
 
 1. Tamamlandı — satış–destek yükü. Ürün başına olay türü, harcanan dakika ve çözüldü durumu. Müşteri kişisel verilerini kaydetmeden destek zamanı/satış oranı. Mesaj API erişimi varsayılmaz.

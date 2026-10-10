@@ -62,9 +62,27 @@ function weeklySummary(products,updated,now=Date.now()){
  });
  return {ready:true,from:new Date(end-7*day).toISOString().slice(0,10),to:new Date(end-day).toISOString().slice(0,10),rows,current:rows.filter(r=>r.ready).reduce((s,r)=>s+r.current,0),previous:rows.filter(r=>r.ready).reduce((s,r)=>s+r.previous,0)};
 }
+function automaticGroup(product){
+ const text=(String(product.title||'')+' '+(product.tags||[]).join(' ')).toLocaleLowerCase('en').normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+ const rules=[['Dini modeller',/\b(jesus|christ|crucifix|crucified|madonna|saint|angel|religious|isa|melek)\b|virgin mary/],['Dans ve balerin',/\b(ballerina|ballet|dancer|dance|balerin)\b/],['Büst ve portre',/\b(bust|portrait|busts)\b/],['Düzenleyici ve aparatlar',/\b(organizer|organiser|holder|bracket|adapter|stand)\b/],['Saksı ve bahçe',/\b(planter|plant|garden|pot)\b/],['Vazo ve dekor',/\b(vase|vazo|vases)\b/],['Aydınlatma',/\b(lamp|lantern|lampshade|light)\b/],['Minyatür ve oyun',/\b(miniature|tabletop|terrain|miniatures|dnd)\b/],['Hayvan modelleri',/\b(cat|dog|lion|dragon|wolf|animal|bird|elephant)\b/],['Heykel ve figür',/\b(sculpture|statue|figurine|figure|heykel)\b/]];
+ return rules.find(([,pattern])=>pattern.test(text))?.[0]||'Diğer modeller';
+}
+function suggestedMarketQueries(products){
+ const queries={'Dini modeller':'religious sculpture stl','Dans ve balerin':'ballerina sculpture stl','Büst ve portre':'portrait bust stl','Düzenleyici ve aparatlar':'organizer stl','Saksı ve bahçe':'planter stl','Vazo ve dekor':'vase stl','Aydınlatma':'lamp stl','Minyatür ve oyun':'tabletop miniature stl','Hayvan modelleri':'animal sculpture stl','Heykel ve figür':'sculpture stl'};
+ const sorted=[...products].sort((a,b)=>(b.salesAvailable===false?0:b.periods?.find(p=>p.days===90)?.quantity||0)-(a.salesAvailable===false?0:a.periods?.find(p=>p.days===90)?.quantity||0));
+ return [...new Set(sorted.map(p=>queries[automaticGroup(p)]).filter(Boolean))].slice(0,3);
+}
+function dailySalesSeries(products,updated,days=14,now=Date.now()){
+ const day=86400000,stamp=Date.parse(updated);
+ if(!Number.isInteger(days)||days<1||days>90||!Number.isFinite(stamp)||stamp>now||now-stamp>2*day)return {ready:false,reason:'Grafik için güncel satış verisi gerekiyor.',series:[]};
+ const known=products.filter(p=>p.salesAvailable!==false&&p.daily),end=Math.floor(stamp/day)*day;
+ if(!known.length)return {ready:false,reason:'Günlük satış verisi olan aktif ürün yok.',series:[]};
+ const series=Array.from({length:days},(_,i)=>{const date=new Date(end-(days-i)*day).toISOString().slice(0,10);return {date,quantity:known.reduce((sum,p)=>sum+(Number(p.daily[date])||0),0)};});
+ return {ready:true,series,known:known.length,unknown:products.length-known.length,total:series.reduce((sum,p)=>sum+p.quantity,0)};
+}
 function familySummary(products,assignments={}){
  const groups=new Map();
- for(const p of products){const name=assignments[String(p.id)]||'Sınıflandırılmadı';if(!groups.has(name))groups.set(name,{name,products:0,known:0,quantity:0,selling:0,money:{}});const g=groups.get(name);g.products++;const r=p.periods?.find(r=>r.days===90);if(p.salesAvailable===false||!r)continue;g.known++;g.quantity+=r.quantity;if(r.quantity>0)g.selling++;if(r.currency&&r.revenue!==null)g.money[r.currency]=(g.money[r.currency]||0)+r.revenue;}
+ for(const p of products){const name=assignments[String(p.id)]||automaticGroup(p);if(!groups.has(name))groups.set(name,{name,products:0,known:0,quantity:0,selling:0,money:{}});const g=groups.get(name);g.products++;const r=p.periods?.find(r=>r.days===90);if(p.salesAvailable===false||!r)continue;g.known++;g.quantity+=r.quantity;if(r.quantity>0)g.selling++;if(r.currency&&r.revenue!==null)g.money[r.currency]=(g.money[r.currency]||0)+r.revenue;}
  return [...groups.values()].map(g=>({...g,perProduct:g.known?g.quantity/g.known:null})).sort((a,b)=>b.quantity-a.quantity);
 }
 function supportSummary(products,events,now=Date.now()){
@@ -126,5 +144,27 @@ function marketPriceSummary(listings){
  const reason=!listings.length?'Etsy bu gözlemde ilan döndürmedi.':!digital.length?(unknownType?'İlanlar alındı, fakat '+unknownType+' ilanın türü bilinmiyor ve dijital türünde doğrulanmış ilan yok. Fiyat medyanı hesaplanmadı.':'İlanlar alındı; örneklemde dijital indirme türünde ilan yok. Dijital fiyat medyanı hesaplanmadı.'):'Dijital ilanlar alındı, ancak geçerli fiyat ve para birimi bulunamadı. Fiyat medyanı hesaplanmadı.';
  return {digital:digital.length,unknownType,medians,reason};
 }
-if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary,supportSummary,changeAssessment,listingChecks,financeSummary,sharingComparison,marketPriceSummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;root.supportSummary=supportSummary;root.changeAssessment=changeAssessment;root.listingChecks=listingChecks;root.financeSummary=financeSummary;root.sharingComparison=sharingComparison;root.marketPriceSummary=marketPriceSummary;}
+function dailyBrief(snapshot,records={},now=Date.now()){
+ const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Istanbul'}).format(new Date(now));
+ const products=snapshot?.products||[],stamp=Date.parse(snapshot?.salesUpdated||snapshot?.updated);
+ const fresh=Number.isFinite(stamp)&&now>=stamp&&now-stamp<=2*86400000;
+ const tasks=[],support=records.support||[],shares=records.shares||[];
+ const open=support.filter(e=>!e.resolved),due=open.filter(e=>e.due&&e.due<=date);
+ for(const e of open.filter(e=>!e.due||e.due<=date))tasks.push({key:'support:'+e.id,kind:'support',id:e.id,product:e.product,title:e.title,priority:e.due?100:80,date:e.due||e.date,label:e.due?'Müşteri takibinin zamanı geldi':'Açık müşteri işi',reason:e.kind+(e.due?' · Takip: '+e.due:' · Takip tarihi belirlenmemiş'),target:'support'});
+ const plans=shares.filter(r=>r.status==='planned'&&r.date<=date);
+ for(const r of plans)tasks.push({key:'share:'+r.id,kind:'sharing',id:r.id,title:r.title,priority:90,date:r.date,label:'Paylaşım planı hazır',reason:r.channel+' · Planlanan tarih: '+r.date,target:'sharing'});
+ for(const p of products){
+  const id=String(p.id),trend=salesTrend(p,snapshot?.salesUpdated||snapshot?.updated,now);
+  const hidden=(records.actions||[]).some(a=>a.product===id&&a.until>now&&(a.kind==='snoozed'||a.label===trend.label));
+  if(fresh&&trend.priority===4&&!hidden)tasks.push({key:'product:'+id,kind:'products',product:id,title:p.title,priority:trend.priority===4?70:40,label:trend.label,reason:trend.reason,target:'daily',review:true});
+  if(p.age!==null&&p.age!==undefined&&p.age<30){const audit=listingChecks(p);const needsCheck=audit.missing>0||audit.checks.some(c=>['type','format','digital'].includes(c.id)&&c.status==='review');if(needsCheck&&records.inspections?.[id]?.fingerprint!==audit.fingerprint)tasks.push({key:'audit:'+id,kind:'products',product:id,title:p.title,priority:60,label:'Yeni ürünün içeriğini incele',reason:audit.unknown?'Bazı ilan bilgileri alınmadı; önce ürün verisini güncelle.':'Başlık, görseller ve dijital teslim açıklamasını kontrol et.',target:'listing-audit'});}
+ }
+ if(fresh){
+  for(const c of records.changes||[]){const p=products.find(p=>String(p.id)===String(c.product));if(!p)continue;const result=changeAssessment(p,products,c,records.changes||[],snapshot?.salesUpdated||snapshot?.updated,now);if(result.before!==undefined)tasks.push({key:'change:'+c.id,kind:'results',product:String(p.id),title:p.title,priority:30,date:c.date,label:'Değişiklik dönemleri tamamlandı',reason:result.label+' · '+c.kind,target:'change-evaluations'});}
+  for(const r of shares.filter(r=>r.status==='shared')){const p=products.find(p=>String(p.id)===r.product),result=sharingComparison(p,r,snapshot?.salesUpdated||snapshot?.updated,now);if(result.before!==undefined)tasks.push({key:'share-result:'+r.id,kind:'results',id:r.id,title:p.title,priority:20,date:r.date,label:'Paylaşım satış dönemleri hazır',reason:r.channel+' · Önce '+result.before+', sonra '+result.after+' adet; kaynak ilişkisi bilinmiyor.',target:'sharing'});}
+ }
+ tasks.sort((a,b)=>b.priority-a.priority||(a.date||date).localeCompare(b.date||date)||a.key.localeCompare(b.key));
+ return {date,fresh,active:snapshot?products.length:null,open:open.length,due:due.length,plans:plans.length,review:new Set(tasks.filter(t=>t.kind==='products').map(t=>t.product)).size,tasks};
+}
+if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary,supportSummary,changeAssessment,listingChecks,financeSummary,sharingComparison,marketPriceSummary,dailyBrief,automaticGroup,suggestedMarketQueries,dailySalesSeries};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;root.supportSummary=supportSummary;root.changeAssessment=changeAssessment;root.listingChecks=listingChecks;root.financeSummary=financeSummary;root.sharingComparison=sharingComparison;root.marketPriceSummary=marketPriceSummary;root.dailyBrief=dailyBrief;root.automaticGroup=automaticGroup;root.suggestedMarketQueries=suggestedMarketQueries;root.dailySalesSeries=dailySalesSeries;}
 })(globalThis);

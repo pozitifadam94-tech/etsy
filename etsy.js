@@ -1,3 +1,4 @@
+const {listingObservations}=require('./observations');
 const fs=require('node:fs');
 const path=require('node:path');
 const os=require('node:os');
@@ -45,10 +46,11 @@ async function sync(){
   const updated=new Date().toISOString();
   // Product visibility must not depend on whether sales access succeeds.
   const products=summarize(listings,[]).map(p=>({...p,periods:[],salesAvailable:false}));
-  persist({...data,snapshot:{updated,listingCount:listings.length,products,diagnostics,salesUpdated:null},error:null});
+  const observations=[...(data.snapshot?.observations||[]),...listingObservations(data.snapshot,products,updated)].slice(-100);
+  persist({...data,snapshot:{updated,listingCount:listings.length,products,diagnostics,observations,salesUpdated:null},error:null});
   stage='Satislar';const receipts=await pages('/shops/'+id+'/receipts?min_created='+Math.floor((Date.now()-90*86400000)/1000));
   for(const r of receipts)r.transactions=await pages('/shops/'+id+'/receipts/'+r.receipt_id+'/transactions');
-  persist({...data,snapshot:{updated,listingCount:listings.length,receiptCount:receipts.length,transactionCount:receipts.reduce((s,r)=>s+(r.transactions?.length||0),0),bundles:bundleAnalysis(listings,receipts),products:summarize(listings,receipts).map(p=>({...p,salesAvailable:true})),diagnostics,salesUpdated:new Date().toISOString()},error:null});
+  persist({...data,snapshot:{updated,listingCount:listings.length,receiptCount:receipts.length,transactionCount:receipts.reduce((s,r)=>s+(r.transactions?.length||0),0),bundles:bundleAnalysis(listings,receipts),observations,products:summarize(listings,receipts).map(p=>({...p,salesAvailable:true})),diagnostics,salesUpdated:new Date().toISOString()},error:null});
  }catch(e){persist({...data,error:stage+': '+e.message});}finally{busy=false;}
 }
 let marketBusy=false,marketQueued=false;

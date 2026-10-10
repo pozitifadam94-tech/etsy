@@ -1,116 +1,65 @@
-# STL Niş Atölyesi
+# STL Atölyesi
 
-GoatDesgnShop için Türkçe STL niş araştırma ve ürün aday takip uygulaması. Node.js 20+ yeterlidir; harici paket veya hesap gerekmez.
+GoatDesgnShop için Türkçe, kişisel mağaza çalışma alanı. Günlük kullanımda ürünleri, satış hareketini ve pazar gözlemlerini Etsy’den otomatik alır. Ücretli AI API, n8n, harici npm paketi veya abonelik gerektirmez.
 
-## Çalıştırma
+## Başlatma
+
+Windows için [WINDOWS.md](WINDOWS.md) adımlarını kullan. Node.js 20+ kurulu olduğunda `windows-start.cmd` paneli açar. Geliştirme ortamında:
 
 ```sh
 cd /workspace/etsy
 npm start
 ```
 
-Sunucu 3000 portunu kullanır; `PORT` ile değiştirilebilir. `npm test` puanlama kontrollerini çalıştırır.
+Sunucu varsayılan olarak 3000 portunu kullanır. `npm test` veri hesaplarını, gözlemleri ve sürüm karşılaştırmasını doğrular. `npm run build:pages` statik dosyaları `docs/app` içine kopyalar. Kaynaklarda hiçbir Etsy anahtarı bulunmamalıdır.
 
-## Kullanım
+## Günlük kullanım — 1.4.0
 
-1. Niş ve İngilizce Etsy arama ifadesi ekle. İlgili sonuç sayısını biliyorsan kaydet.
-2. Etsy araştırma bağlantısını aç, dijital STL ilanlarını seç. Aynı 90 günlük dönem için yorum sayısı, fiyat ve gözlem tarihini kaydet. Bilinmeyen yorumu boş bırak.
-3. En az üç yorum verili ilan ve iki mağaza olduğunda örneklem fırsat puanı oluşur. Farklı tarihler ve seçilmiş örnekler sonuçları etkiler.
-4. Telegram ürün adaylarını nişlere bağla ve durumlarını takip et.
-5. JSON yedek indir. Veriler tarayıcının localStorage alanındadır; farklı cihaz veya tarayıcı otomatik paylaşmaz.
+- **Bugün:** bağlantı durumu, aktif ürünler, son 30 gün satış adedi, inceleme önerileri ve yeni ürünler. En fazla üç öneriyle başlar; diğerleri isteğe bağlı gösterilir. Satış düşüşleri, gerçek ilan bilgisi eksikleri ve varsa kaydedilmiş işler öne çıkar. Düşük satışlı her ürüne veya içeriği tamamlanmış her yeni ilana görev üretilmez.
+- **Ürünler:** Etsy’den gelen görseller, fiyat ve son 30 gün satış adedi. Detayda 30/60/90 gün sonuçları, ilan kontrolleri ve otomatik gözlenen düzenlemeler bulunur. Not formları kapalı başlar.
+- **Satışlar:** iki ayrık haftanın karşılaştırması ve son 14 tam UTC gününün satış grafiği. Günlük adetler okunabilir tabloda da bulunur; tamamlanmamış bugün grafiğe girmez.
+- **Ürün grupları:** başlık ve etiketlerden otomatik gruplandırma. Önceki kullanıcı atamaları korunur. Paket adayları ayrı, açılabilir alandadır.
+- **Pazar gözlemi:** gruplarından türetilmiş en fazla üç hazır İngilizce arama; birini seçince yerel takip kaydı eklenir. Başka mağaza/arama ekleme formu isteğe bağlıdır.
+- **Ayarlar:** bağlantı, sürüm kontrolü, yedekler ve önceki isteğe bağlı araçlar.
 
-CSV başlıkları: `niche,title,shop,url,price,reviews,date`. Tarih YYYY-MM-DD, fiyat USD ve ondalık ayırıcı nokta olmalıdır. Bilinmeyen yorum boş bırakılır. Niş adı mevcut kayıtla eşleşmelidir. Hatalı aktarım kısmen uygulanmaz; yinelenen ilanlar atlanır.
+Yalnızca seçilen bölüm gösterilir. URL bölüm bağlantıları, tarayıcı geri/ileri ve mobil menü desteklenir. Yeni veri gelmediyse arka plan kontrolü açık tabloları veya klavye odağını sıfırlamaz. Günlük kullanım için manuel form doldurmak gerekmez.
 
-Canlı Etsy toplama/API entegrasyonu yoktur. Gerçek rakip ve satış verileri uydurulmaz. Yorum sayısı satış hacmi değildir; puan kârlılığı ölçmez. Uygulama hesap veya sunucu veritabanı içermez.
+## Etsy bağlantısı ve kapsam
 
-## Tanıtım sayfasını yayımlama
+Yerel panelde Etsy uygulamanın Keystring ve Shared secret değerlerini gir; OAuth ile kendi mağazanı bağla. Callback kaydı `http://localhost:3000/oauth/callback` olmalıdır. Bağlantı salt okunurdur; `listings_r shops_r transactions_r` izinleri kullanılır. Ürünler başlangıçta ve sunucu açıkken 30 dakikada bir yenilenir. Bilgisayar kapalıyken takip çalışmaz. Etsy erişimi bu bulut ortamında doğrulanamaz; kullanıcının Windows bağlantısının ve ilk ürün/satış verisinin çalıştığı bildirildi.
 
-`docs/index.html` Etsy uygulama başvurusu için İngilizce proje tanıtımıdır; çalışan uygulama veya canlı API bağlantısı değildir. Dosyalar GitHub'a gönderildikten sonra depo Settings → Pages bölümünde "Deploy from a branch", gerçek yayımlama dalı ve `/docs` klasörünü seç. Yayımlama başarıyla tamamlanırsa beklenen adres `https://pozitifadam94-tech.github.io/etsy/` olur. Başvuruya yazmadan önce adresin açıldığını doğrula. GitHub Pages kullanılabilirliği depo görünürlüğüne ve hesap planına bağlıdır; özel depoyu kendiliğinden herkese açık yapma.
+Yalnızca şu anda aktif ilanlar ve son 90 günün ödenmiş, iptal edilmemiş sipariş satırları hesaplanır. Satış adedi dosya/ürün miktarıdır; satış satırı benzersiz sipariş sayısı değildir. Ürün bedelleri net kâr, toplam mağaza geliri veya Etsy ödeme bakiyesi değildir. İadeler, ücretler, vergiler, görüntülenme, kaynak trafiği ve mesajlar bu bağlantıda otomatik alınmaz. Bunlar tahminle doldurulmaz. Farklı para birimleri ayrı tutulur.
 
-## Geliştirilmiş arayüz
+Eski, eksik ve doğrulanmış sıfır veriler ayrı gösterilir. Günlük satış önerileri ve grafik için en fazla iki günlük snapshot gerekir. Trend karşılaştırması en az 60 günlük ilanlarda iki ayrık 30 günlük dönemi kullanır; küçük örnek kesin sonuç sayılmaz. Sıfır başlangıçtan yüzde artış üretilmez. Eksik ürünler grafikte/satış toplamında dışarıda tutulur ve kapsam açıklanır.
 
-Niş arama, veri yeterliliği filtresi, puan/fiyat sıralama, yan yana karşılaştırma, ilan düzenleme, son silmeyi geri alma ve aday araştırma bilgileri bulunur. Etsy API durum kartı onay beklediğini gösterir; canlı bağlantı yoktur.
+## Otomatik ilan değişikliği gözlemi
 
-`npm run build:pages` ile statik uygulama dosyalarını `docs/app` içine güncelle. GitHub Pages yayımlaması tamamlandığında panel `/etsy/app/` yolunda açılır. API anahtarlarını bu statik siteye ekleme; gelecekteki API bağlantısı güvenli bir sunucu gerektirir.
+Her başarılı ürün alımı önceki snapshot ile karşılaştırılır. Bilinen başlık, açıklama, etiket, görsel kimlik/sırası, ilan türü ve fiyat alanlarındaki farklar kaydedilir. İlk gözlem ve önceki veride olmayan alanlar düzenleme sayılmaz. Yeni görülen ilan geçmişten beri var olabilir. Etiket sırası ve aynı tutarı ifade eden farklı fiyat bölenleri fark sayılmaz. Satış veya favori değişimi ilan düzenlemesi değildir.
 
-## Ürün havuzu ve satış denemeleri
+En fazla 100 gözlem saklanır. Kayıt önceki ve yeni gözlem zamanını gösterir; tam Etsy düzenleme zamanı bilinmez. Gözlem, değişikliğin satışa etkisini veya nedenini kanıtlamaz. Otomatik gözlemler manuel değişiklik değerlendirmelerine karıştırılmaz. Satış izni başarısız olsa da alınmış ürün bilgileri ve gözlem kaydı korunur.
 
-Ürün adaylarına PNG/JPEG/WebP görseller eklenebilir (en fazla 5 MB); tarayıcı 640 piksele küçültüp JPEG olarak yedeğe dahil eder. Görseller cihazdaki tarayıcı depolama kotasını kullanır. Aday adını/notunu arayabilir, durumla filtreleyebilirsin.
+## Otomatik gruplar ve pazar takibi
 
-Satış denemelerinde ürün başına ilk 30/60/90 günün birikimli sonuçları ayrı tutulur; aynı dönem yeniden kaydedilirse güncellenir. Dönüşüm sipariş/görüntülenme olarak hesaplanır; sıfır görüntülenmede gösterilmez. Net tutar yalnızca gider girildiyse gelir eksi giderdir. Dönemleri toplama. Ürün veya niş silindiğinde bağlı sonuçlar silinir; son silmeyi geri al tüm bağlı kayıtları geri getirir. Eski JSON yedekleri desteklenir.
+Gruplar basit başlık/etiket kurallarıyla önerilir; dosya içeriği veya yapay zekâ değerlendirmesi değildir. Tanınmayanlar Diğer modeller olur. Kullanıcının önceki grup ataması önceliklidir. Grup tablosu yalnızca satış verisi olan aktif ürünleri toplar; ürün sayısı, yaşı, sezon ve trafik farklarını talep/kârlılık olarak yorumlamaz.
 
-Araştırma görevleri eksik örnekleri, eksik sonuç sayısını, 30 günden eski gözlemleri ve tek mağaza ağırlığını gösterir. Görevler puanın yerine geçmez. Canlı API, kullanıcı girişi ve cihazlar arası otomatik senkronizasyon henüz yoktur.
+Hazır aramalar, bilinen 90 günlük satış adedine göre sıralanan ürün gruplarından türetilir; talep veya düşük rekabet önerisi değildir. Zaten takip edilen kelimeler tekrar önerilmez. API erişimi sağlanıyorsa en fazla 10 takip, her takipte ilk 100 ilan ve son 30 başarılı gözlem tutulur. Sunucu açıkken 6 saati dolan takipler yenilenir. Manuel yenilemede en az 10 dakika, hata sonrası bir saat, 429 sonrası altı saat beklenir. Önceki başarılı veri hatada korunur.
 
-## Ürün karnesi ve ücretsiz mesaj yardımcısı
+API sonuç sayısı arama hacmi veya dijital STL toplamı değildir. Yeni gözlenen ilan yeni yayımlanmış, örneklemden çıkan ilan silinmiş sayılmaz. Fiyat farkı ortak ilanlarda aynı para birimiyle hesaplanır. Dijital fiyat medyanı yalnızca `type=download` ilanlarda hesaplanır; boş örneklem, tür eksikliği ve fiyat eksikliği ayrı açıklanır. Rakiplerin özel satışlarına erişilmez.
 
-Ürün karnesi en uzun tamamlanmış deneme dönemini kullanır. 100 görüntülenmeden az veri için puan verilmez. En az 3 sipariş ve %2 dönüşümde "Devam et"; ilk 90 günde 300 görüntülenme ve sıfır siparişte "Duraklatmayı değerlendir" gösterilir. Negatif net gelir maliyet incelemesi gerektirir. Bunlar başlangıç eşikleridir, Etsy ölçütleri veya istatistiksel güven garantisi değildir. Hiçbir ilan otomatik kaldırılmaz. Puan %3 dönüşümde 100 olacak şekilde ölçeklenir. Eski veya tutarsız gözlemlerde puan gösterilmez.
+## Önceki manuel araçlar
 
-Mesaj yardımcısı ücretsiz sabit İngilizce/Türkçe şablonlar ve mevcut ChatGPT kullanımına aktarılabilecek profil+mesaj metni sağlar. Otomatik çeviri, AI API veya Etsy mesaj erişimi yoktur. İngilizce metin düzenlenirse Türkçe açıklama otomatik güncellenmez. Müşteri mesajı sunucuya gönderilmez veya uygulama yedeğine kaydedilmez.
+Niş notları, rakip ilan kayıtları, adaylar, 30/60/90 günlük deneyler, manuel ürün karnesi, müşteri işleri, paylaşım ölçümleri ve gider defteri Ayarlar’dan açılır. Eski JSON yedekleri desteklenir; bu araçlar silinmedi, ana günlük akıştan çıkarıldı. Kaydedilmiş müşteri işleri ve paylaşım planları varsa günlük listede görünebilir. Formları doldurmamak canlı takibi engellemez.
 
-Etsy uygulamasının onaylandığı kullanıcı tarafından bildirildi; API bağlantısı henüz yapılmadı. GitHub Pages güvenli sunucu veya gizli anahtar deposu değildir. Keystring/Shared secret/OAuth token kaynak koduna, tarayıcıya veya GitHub'a eklenmemelidir. Kendi mağaza verilerine erişim için uygun OAuth izinleri ve kayıtlı callback gerekir. API'nin Etsy Stats görüntülenmelerini veya mesajlarını sağladığı varsayılmamalıdır; desteklenmeyen ölçümler manuel girilir. Ücretsiz kişisel sunucu seçeneği bilgisayar açıkken çalışabilir; sürekli ücretsiz barındırma garanti edilmez.
+Mesaj yardımcısı ücretsiz İngilizce/Türkçe şablonlar ve mevcut ChatGPT kullanımına kopyalanabilir profil metni sağlar. AI API, otomatik çeviri veya Etsy mesaj erişimi içermez. Müşteri mesajı saklanmaz, yedeğe eklenmez veya sunucuya gönderilmez. Paylaşımlar platforma otomatik gönderilmez.
 
-## Günlük öncelikler, trend ve değişiklik günlüğü
+Manuel değişiklik notlarında önce/sonra 14 tam UTC gün ve diğer uygun aktif ürünler karşılaştırılır; küçük örnek, eşzamanlı düzenleme ve yetersiz tarih kapsamı belirtilir. Paylaşım kayıtlarında önce/sonra 7 günlük tüm kaynaklardan gelen satış adetleri gösterilir; kaynak dönüşümü veya nedensellik çıkarılmaz. Gider defteri yalnızca kayıtlı gelir eksi gider/iade bakiyesidir; otomatik net kâr sunmaz. İnceledim işareti trend aynı kaldığı sürece yedi gün, erteleme seçilen üç/yedi gün öneriyi gizler.
 
-Canlı ürünlerin son 30 günü, 60 günlük toplamdan 30 günlük toplam çıkarılarak elde edilen önceki 30 günle adet bazında karşılaştırılır. İlan yaşı 60 günden küçükse eşit dönem karşılaştırması yapılmaz. Toplam 3 adetten az satış küçük örnek olarak belirtilir. Başlangıç sıfırsa yüzde artış üretilmez. İki günden eski satış snapshot'ı güncelleme gerektirir. Öncelikler inceleme önerisidir; Etsy ilanını değiştirmez veya silmez.
+## Veriler ve güncelleme
 
-Ürün detayında görsel/başlık/fiyat/açıklama değişikliklerini not edebilirsin. Bu notlar tarayıcıda saklanır ve JSON yedeğine dahildir. Yeni API snapshot'ı notları silmez. Önceki/sonraki 14 günlük adet karşılaştırması değişiklik sonrası 14 tam gün tamamlanınca yapılır. Önceki dönem 90 günlük veri kapsamına sığmalı ve ilan o dönemde açık olmalıdır. Hesap günlük UTC satış toplamları kullanır, değişiklik günü sonraki pencereye dahildir. Bu karşılaştırma nedensellik kanıtı değildir; eşzamanlı değişiklikler, sezon ve reklamlar sonucu etkiler.
+Araştırma, not, manuel grup, inceleme ve isteğe bağlı kayıtlar tarayıcı `localStorage` alanında kalır; JSON olarak yedeklenebilir. Aynı tarayıcı ve aynı adres/port gerekir. GitHub Pages ile yerel panel farklı depolama alanlarıdır. Aday görselleri en fazla 5 MB PNG/JPEG/WebP’den 640 piksel JPEG’e küçültülür; yedeğe dahildir.
 
-Yeni sürümde günlük satış adetlerinin gelmesi için bir kez başarılı senkronizasyon gerekir. Günlük satışlar kişisel müşteri bilgisi içermez. Eski snapshot'larda günlük veri bulunmuyorsa karşılaştırma beklemede gösterilir.
+Anahtarlar, OAuth tokenları, ürün snapshot’ı, otomatik gözlemler ve pazar takibi `%LOCALAPPDATA%\STLNicheLab\connection.json` dosyasında tutulur. Dosya proje dışındadır; ZIP güncellemesi bağlantıyı değiştirmez. Dosya şifreli değildir ve anahtar içerir; paylaşılmaz. Güvenli bağlantı değerleri kaynak koduna, GitHub’a, tarayıcıya veya araştırma JSON yedeğine eklenmez. Pazar gözlem geçmişi ayrı düğmeyle anahtar içermeyen JSON olarak indirilebilir; otomatik geri yüklemesi yoktur.
 
-## İnceledim, erteleme ve haftalık özet
+Sürüm kontrolü yalnızca resmi GitHub raw `package.json` adresine gider; Etsy kimlik bilgilerini göndermez. Dosyalar otomatik değiştirilmez. Güncelleme: yedek indir, eski sunucuyu kapat, ZIP’i ayrı klasöre çıkart ve başlat. GitHub Pages statik arayüzü gösterir; canlı API bağlantısı veya gizli anahtar deposu değildir.
 
-Günlük öneride İnceledim, öneriyi aynı durum devam ettiği sürece 7 gün gizler; durum değişirse öneri daha erken geri gelir. 3/7 gün sonra ertelemesi, seçilen süre bitene kadar öneriyi gizler. Bu işlemler Etsy ilanını değiştirmez. Gizlenen önerileri yeniden göster tüm işaretleri temizler. Kayıtlar tarayıcıda tutulur ve JSON yedeğine dahildir.
-
-Haftalık özet, son satış snapshot'ının gününden önceki 7 tam UTC gününü, ondan önceki ayrık 7 günle karşılaştırır. Bugün dışarıda kalır. Karşılaştırılabilir ürünler en az 14 günlük, günlük satış verisi bulunan aktif ilanlardır. Bu ürünlerin toplamı mağaza geneli toplamı olarak sunulmaz. Toplam 3 adetten az satış küçük örnek olarak işaretlenir. Son 90 günlük veri içinde ilk gözlenen satış yaşam boyu ilk satış değildir. Eski ve eksik veri ayrı gösterilir. Sonuçları görmek için bir kez senkronizasyon yap.
-
-## Paket adayları ve ürün aileleri
-
-Son 90 günlük ödenmiş, iptal edilmemiş siparişlerde birlikte alınan aktif ilan çiftleri hesaplanır. Aynı siparişte tekrar eden satırlar veya çoklu adetler aynı çifti tekrar saydırmaz. En az üç ayrı siparişte ortak alışveriş araştırma adayıdır; daha düşük sayılar veri yetersiz olarak gösterilir. Bu eşik istatistiksel güven veya paket satış garantisi değildir. Yalnızca çift sayıları saklanır; sipariş kimliği ve müşteri bilgisi tutulmaz.
-
-Ürün detayında aile adı verilebilir; atamalar tarayıcıda saklanır ve JSON yedeğine dahildir. Aile tablosu ürün sayısı, satış verisi olan ürün sayısı, satış gören ürün sayısı ve ürün başına adet gösterir. Farklı para birimleri ayrı tutulur. Aileler ürün yaşı, sezon, trafik veya reklam için normalize edilmez; niş talebi/kârlılık sıralaması sayılmaz.
-
-Yeni sürümle bir kez Şimdi güncelle yaparak paket özetini getir. Etsy bağlantısı Windows kullanıcı klasöründe korunduğu için proje güncellemesinde yeniden anahtar girmek gerekmez.
-
-## Müşteri işleri ve destek yükü
-
-Canlı ürün detayında sorun türü, tarih, harcanan tam dakika, takip tarihi, kısa not ve açık/çözüldü durumuyla iş kaydedilir. Müşteri mesajının tamamını veya kişisel bilgileri ekleme. Kayıtlar tarayıcıda tutulur ve JSON yedeğine dahildir. Etsy mesajları okunmaz/gönderilmez. Açık işler günlük önceliklerde ve Müşteri işleri ekranında gösterilir; düzenleme, çözme/yeniden açma ve silme desteklenir. Takip tarihi geldiğinde panelde işaretlenir; dış bildirim gönderilmez.
-
-Destek tablosu İstanbul takvimindeki son 30 günün kayıtlı olay/süresini, tüm tarihlerdeki açık işleri ve API'nin kayan 30 günlük satış adedini gösterir. Dakika/adet yalnızca kayıt ve en az 3 satış adedi varsa gösterilir. Eski/eksik API verisinde oran verilmez. Tarih kapsamları tam eşit olmadığından yaklaşık bir göstergedir; müşteri sorun oranı, net kâr veya toplam gerçek destek yükü değildir. Kaydedilmeyen olaylar bilinmez. Aktif ürün listesinden çıkan ürünlerin mevcut destek kayıtları silinmez; başlık yedeğiyle gösterilir, satış oranı bilinmiyor olur.
-
-## Değişiklik sonuçlarını diğer ürünlerle karşılaştırma
-
-Değişiklik sonuçları bölümünde ve ürün detayındaki günlükte önceki/sonraki 14 tam UTC gününün adetleri gösterilir. Hedef ürün karşılaştırma grubuna girmez. Aynı dönemde değişiklik kaydı olan diğer ürünler, satış verisi eksik olanlar ve tam ilan geçmişi olmayanlar dışlanır. Karşılaştırma yalnızca şu anda aktif ürünlerle yapılır; seçilim, sezon ve reklam farkları düzeltilmez.
-
-En az 3 diğer uygun ürün, hedefte başlangıç satışı ve toplam 3 adet, diğer ürünlerde her dönemde toplam en az 5 adet aranır. Bu eşikler istatistiksel güven garantisi değildir. Hedefte aynı pencere içinde başka değişiklik varsa ayrı etki yorumu yapılmaz. Ürün ve diğer ürünler için ayrı yüzde değişimi, ardından yüzde puan farkı gösterilir. ±5 yüzde puan benzer hareket etiketi için başlangıç eşiğidir; A/B test sonucu sayılmaz. Güncel snapshot değerlendirme sonrası 14 tam gününü kapsamalıdır. Eski veya eksik veri değerlendirmeyi engeller.
-
-Bu bölüm mevcut değişiklik kayıtlarını kullanır; tekrar girmek gerekmez. Hiçbir Etsy ilanı değiştirilmez. Yeni sürümde satışları bir kez güncelle, ardından Değişiklik sonuçları bölümünü aç.
-
-## Yeni ürün kontrolü
-
-API snapshot'ında başlık, açıklama, etiketler, görsel sayısı/kimlikleri ve ilan türü saklanır. Ürün kontrolü ekranı ilk 30 günlük veya tüm aktif ilanları gösterebilir. Veri alınmadı, doğrulanmış boş bilgi ve inceleme önerisi ayrı işaretlenir. STL/dijital teslim kelimelerinin bulunması temel bir metin kontrolüdür; anlamsal doğruluk, SEO performansı veya dosya sağlamlığı doğrulanmaz. Etiket sayısı 13'ten azsa ilgili yeni ifadeleri değerlendirme önerisidir; tüm alanların doldurulması zorunlu sayılmaz.
-
-İçeriği inceledim işareti tarayıcıda saklanır ve JSON yedeğine dahildir. API bilgisi eksikken işaret konmaz. Başlık/açıklama/etiket/görsel/tür bilgileri değiştiğinde içerik yeniden incelemeye açılır. Eski snapshot'ta yeni alanlar yoksa Şimdi güncelle yap. Yeni ürünlerin ilk listede görünmesi için ilk başarılı senkronizasyon yeterlidir; Etsy ilanları hiçbir şekilde değiştirilmez. Kontrol listesi gerçek müşteri talebi, satış veya kârlılık puanı değildir.
-
-## Gelir/gider ve sürüm bildirimi (1.1.0)
-
-Gelir ve gider defteri son başarılı snapshot içindeki şu anda aktif ürünlerin tarih/para birimi bazındaki ürün bedellerini kullanır. Manuel ek gelir, gider ve iade kayıtları tarayıcıda tutulur ve JSON yedeğine dahildir. Dönem başlangıç/bitiş tarihleri UTC takvimidir; tamamlanmamış son gün son senkronizasyona kadardır. API kapsamı dışındaysa yalnızca manuel kayıtlar gösterilir. Eski/eksik tutar verisi belirtilir. Farklı para birimleri çevrilmez. Çıktı kayıtlı bakiye olup net kâr, mağazanın tüm gelirleri veya Etsy ödeme bakiyesi değildir. Etsy ücretleri, vergiler ve iadeler otomatik alınmaz; manuel kayıt girilmeli, çift sayım önlenmelidir.
-
-Yeni sürüm var mı düğmesi yerel sunucudan yalnızca sabit resmi GitHub raw package.json adresini okur; Etsy tokenı/anahtarı göndermez. Yeni sürümde ZIP indirme bağlantısını gösterir. Güncelleme kullanıcı tarafından yapılır: JSON yedek indir, eski pencereyi kapat, ZIP'i ayrı klasöre çıkart ve başlat. Bağlantı dosyası proje dışında korunur. Ağ erişimi yoksa hata gösterir; panel çalışmaya devam eder. Sürümler sayısal karşılaştırılır ve başarılı sürüm kontrolü 10 dakika önbelleğe alınır. GitHub Pages yalnızca mevcut sürüm bilgisini gösterir; sunucudaki sürüm kontrolünü çalıştırmaz.
-
-## Rakip ve anahtar kelime gözlemi (1.2.0)
-
-Yerel Etsy bağlantısının app key/secret bilgisiyle halka açık API istekleri yapılır; rakipler için özel OAuth tokenı gönderilmez. Kullanıcının uygulama erişimi bu endpointleri kısıtlayabilir: hata gösterilir, veri uydurulmaz veya erişim engeli aşılmaz. Gerçek ağ/hesap erişimi bu ortamda doğrulanamadı; kullanıcı Windows'ta ilk gözlemi doğrulamalıdır.
-
-En fazla 10 takip, her kayıtta ilk 100 ilan ve son 30 başarılı snapshot tutulur. Sunucu açıkken başlangıçta ve her 30 dakikalık kontrolde 6 saati dolmuş takipler güncellenir. Manuel güncellemede de en az 10 dakika beklenir. Hata sonrası 1 saat, 429 sonrası 6 saat beklenir; önceki başarılı veri korunur. Mağaza tam ad veya Etsy shop URL ile, arama 2–100 karakter metinle kaydedilir. İlk başarılı gözlem başlangıçtır. Sonraki gözlemler ortak ilanların aynı para birimindeki fiyatlarını ve örnekleme giriş/çıkışlarını karşılaştırır. Yeni gözlenen ilan yeni yayımlanmış olmak zorunda değildir; örneklemden çıkan ilan silinmiş sayılmaz. Arama API count'ı arama hacmi, talep veya dijital STL toplamı değildir. İlk 100 sonuç fiziksel/ilgisiz ilanlar içerebilir. Dijital fiyat medyanı yalnızca type=download dönen örneklerde ve para birimi ayrı tutularak hesaplanır.
-
-Takip listesi/geçmişi Windows bağlantı dosyasında korunur; tarayıcı araştırma JSON yedeğinden ayrıdır. Takip verilerini indir düğmesi anahtar/token içermeyen tüm saklanan gözlem geçmişini dışa aktarır. Bu dosya için henüz otomatik geri yükleme yoktur. Ekran en son gözlem ve kısa tarihçe gösterir. İlan sayısı ve fiyat değişimi üzerinden kesin rekabet/talep puanı veya satış tahmini verilmez.
-
-## Paylaşım takibi (1.3.0)
-
-Canlı ürün listesinden bir ürün seçip Pinterest, Instagram, Facebook veya diğer kanallarda paylaşım planı kaydedebilirsin. Tarihi gelen planlar günlük yapılacaklarda görünür. Paylaşımı platformda yaptıktan sonra kaydı Paylaşıldı olarak güncelle; istersen HTTPS paylaşım bağlantısı ekle. Kayıtlar düzenlenebilir/silinebilir, tarayıcıda saklanır ve araştırma JSON yedeğine dahildir. Aktif listeden çıkan ürünün geçmiş kaydı korunur.
-
-Trafik otomatik alınmaz. Gerçek dış bağlantı tıklaması veya Etsy kaynak ziyareti ölçümünü, kaynağını ve hangi tarihe kadar ölçüldüğünü manuel girebilirsin. Boş ölçüm bilinmiyor, girilen 0 ise ölçülen sıfırdır. Ölçüm yalnızca paylaşılmış kayda eklenir; tıklama ve ziyaret sipariş sayısı değildir. Metriklerin kapsamı elle doğrulanmalı, aynı kaynağın toplamını ayrı paylaşımlara tekrar atamaktan kaçınılmalıdır.
-
-Güncel satış snapshot'ı paylaşım tarihinden sonraki 7 tam UTC gününü kapsadığında önceki ve sonraki 7 günlük toplam ürün adetleri gösterilir. Paylaşım günü sonraki pencereye dahildir. Önceki dönem 90 günlük kapsamda ve ilan en az o dönem boyunca yayında olmalıdır. Yakın tarihli başka paylaşımın pencereleri çakışıyorsa belirtilir. Bu satışlar tüm kaynaklardan gelir; paylaşımın neden olduğu satış veya kaynak dönüşümü hesaplanmaz. Hiçbir platforma otomatik gönderim yapılmaz, ücretli araç gerekmez.
-
-Rakip kartları artık alınan ilan sayısını, dijital olarak doğrulanmış ilanları ve türü bilinmeyenleri ayrı gösterir. Eksik dijital fiyat medyanı, veri hiç gelmediği anlamına gelmez; boş örneklem, bilinmeyen tür ve eksik fiyat ayrı açıklanır.
+Hiçbir Etsy ilanı otomatik değiştirilmez, yayımlanmaz veya silinmez. Uygulama ürün tut/kaldır, kâr veya satış garantisi vermez.

@@ -60,3 +60,15 @@ Yedek indir, siyah pencereyi kapat, güncel ZIP'i ayrı klasöre çıkart ve `wi
 Paylaşım takibi ekranında ürün, kanal ve tarih seçip plan ekle. Plan tarihi geldiğinde Bugün ne yapmalıyım bölümünde görünür. Pinterest veya diğer platformda paylaşımı yaptıktan sonra Düzenle / sonucu ekle ile Paylaşıldı seç. Ölçümün varsa gerçek tıklama veya ziyaret sayısı, kaynağı ve ölçümün son tarihini ekle; bilmiyorsan sayıyı boş bırak. Paylaşım sonrası 7 tam günün satış verisi tamamlanınca önce/sonra adetler gösterilir. Trafik ölçümü ve platforma paylaşım manuel yapılır.
 
 Rakip kartında Veri çekildi sayacını kontrol et. Dijital fiyat medyanı yoksa kart artık tür/fiyat eksikliğini açıklar; alınmış ilanlar Gözlenen ilanlar altında görülebilir.
+
+## 1.4.0 sade çalışma alanı
+
+Yedek indir, eski siyah pencereyi kapat, güncel ZIP'i ayrı klasöre çıkart ve `windows-start.cmd` ile aç. Etsy bağlantısını yeniden kurman gerekmez. Aynı tarayıcı ve localhost adresindeki kayıtların korunur; yedeğini ayrıca sakla.
+
+Uygulama Bugün ekranıyla açılır. Ana menüde Bugün, Ürünler, Satışlar, Ürün grupları, Pazar gözlemi ve Ayarlar bulunur; bir seferde yalnızca seçtiğin bölüm görünür. Ürünler, grafikler ve öneriler Etsy senkronizasyonundan oluşur. Günlük kullanım için veri formu doldurman gerekmez. Mobil görünümde menüyü üstteki düğmeyle açabilirsin.
+
+Ürün grupları başlık ve etiketlerden otomatik önerilir; önceki grup adların korunur. Pazar gözlemindeki hazır aramalardan birini seçerek yazı yazmadan takibe başlayabilirsin. Bunlar ürün gruplarından türetilen aramalardır; yüksek talep veya düşük rekabet kanıtı değildir.
+
+Başlık, fiyat, açıklama, etiket, görsel ve ilan türü değişiklikleri yeni senkronizasyonlarda otomatik karşılaştırılır. Ürün detayında veya Ürünler > Değişiklik geçmişi bölümünde görünür. İlk veri başlangıç kaydıdır; henüz gözlenmemiş geçmiş düzenlemeler oluşturulmaz. Kaydedilen saat fark edilme saatidir, Etsy'deki tam düzenleme saati değildir. Son 100 gözlem proje dışında bağlantı dosyasında korunur.
+
+Manuel niş notları, deneyler, müşteri işleri, paylaşım ölçümleri ve gider defteri Ayarlar > İsteğe bağlı araçlar alanına taşındı. Hiçbir eski kayıt silinmedi. Ürün detayındaki isteğe bağlı formlar kapalı başlar; ihtiyacın olursa açabilirsin. Bu alanları doldurmamak otomatik ürün takibini engellemez.

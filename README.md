@@ -76,3 +76,11 @@ Yeni sürümle bir kez Şimdi güncelle yaparak paket özetini getir. Etsy bağl
 Canlı ürün detayında sorun türü, tarih, harcanan tam dakika, takip tarihi, kısa not ve açık/çözüldü durumuyla iş kaydedilir. Müşteri mesajının tamamını veya kişisel bilgileri ekleme. Kayıtlar tarayıcıda tutulur ve JSON yedeğine dahildir. Etsy mesajları okunmaz/gönderilmez. Açık işler günlük önceliklerde ve Müşteri işleri ekranında gösterilir; düzenleme, çözme/yeniden açma ve silme desteklenir. Takip tarihi geldiğinde panelde işaretlenir; dış bildirim gönderilmez.
 
 Destek tablosu İstanbul takvimindeki son 30 günün kayıtlı olay/süresini, tüm tarihlerdeki açık işleri ve API'nin kayan 30 günlük satış adedini gösterir. Dakika/adet yalnızca kayıt ve en az 3 satış adedi varsa gösterilir. Eski/eksik API verisinde oran verilmez. Tarih kapsamları tam eşit olmadığından yaklaşık bir göstergedir; müşteri sorun oranı, net kâr veya toplam gerçek destek yükü değildir. Kaydedilmeyen olaylar bilinmez. Aktif ürün listesinden çıkan ürünlerin mevcut destek kayıtları silinmez; başlık yedeğiyle gösterilir, satış oranı bilinmiyor olur.
+
+## Değişiklik sonuçlarını diğer ürünlerle karşılaştırma
+
+Değişiklik sonuçları bölümünde ve ürün detayındaki günlükte önceki/sonraki 14 tam UTC gününün adetleri gösterilir. Hedef ürün karşılaştırma grubuna girmez. Aynı dönemde değişiklik kaydı olan diğer ürünler, satış verisi eksik olanlar ve tam ilan geçmişi olmayanlar dışlanır. Karşılaştırma yalnızca şu anda aktif ürünlerle yapılır; seçilim, sezon ve reklam farkları düzeltilmez.
+
+En az 3 diğer uygun ürün, hedefte başlangıç satışı ve toplam 3 adet, diğer ürünlerde her dönemde toplam en az 5 adet aranır. Bu eşikler istatistiksel güven garantisi değildir. Hedefte aynı pencere içinde başka değişiklik varsa ayrı etki yorumu yapılmaz. Ürün ve diğer ürünler için ayrı yüzde değişimi, ardından yüzde puan farkı gösterilir. ±5 yüzde puan benzer hareket etiketi için başlangıç eşiğidir; A/B test sonucu sayılmaz. Güncel snapshot değerlendirme sonrası 14 tam gününü kapsamalıdır. Eski veya eksik veri değerlendirmeyi engeller.
+
+Bu bölüm mevcut değişiklik kayıtlarını kullanır; tekrar girmek gerekmez. Hiçbir Etsy ilanı değiştirilmez. Yeni sürümde satışları bir kez güncelle, ardından Değişiklik sonuçları bölümünü aç.

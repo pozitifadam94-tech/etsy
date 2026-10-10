@@ -72,5 +72,22 @@ function supportSummary(products,events,now=Date.now()){
  const ids=new Set([...products.map(p=>String(p.id)),...events.map(e=>e.product)]);
  return [...ids].map(id=>{const p=products.find(p=>String(p.id)===id),all=events.filter(e=>e.product===id),recent=all.filter(e=>e.date>=cutoff&&e.date<=end);const sales=p?.periods?.find(r=>r.days===30);const quantity=p?.salesAvailable===false?null:sales?.quantity??null;const minutes=recent.reduce((s,e)=>s+e.minutes,0);return {id,title:p?.title||all[0]?.title||'İlan #'+id,events:recent.length,open:all.filter(e=>!e.resolved).length,minutes,quantity,perUnit:recent.length&&quantity>=3?minutes/quantity:null};}).filter(r=>r.events||r.open).sort((a,b)=>b.open-a.open||b.minutes-a.minutes);
 }
-if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary,supportSummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;root.supportSummary=supportSummary;}
+function changeAssessment(product,products,change,changes,updated,now=Date.now()){
+ const stamp=Date.parse(updated),day=86400000,at=Date.parse(change.date+'T00:00:00Z');
+ if(!Number.isFinite(stamp)||now-stamp>2*day)return {label:'Önce güncelle',reason:'Güncel satış verisi gerekiyor.'};
+ if(product.salesAvailable===false)return {label:'Veri bekleniyor',reason:'Ürünün satış verisi alınmamış.'};
+ const target=changeComparison(product,change.date,Math.min(now,stamp));
+ if(target.before===undefined)return {label:'Karşılaştırma bekliyor',reason:target.reason};
+ const overlaps=c=>{const date=Date.parse(c.date+'T00:00:00Z');return date>=at-14*day&&date<at+14*day;};
+ const concurrent=changes.filter(c=>c.id!==change.id&&String(c.product)===String(product.id)&&overlaps(c)).length;
+ const controls=products.filter(p=>String(p.id)!==String(product.id)&&p.salesAvailable!==false&&!changes.some(c=>String(c.product)===String(p.id)&&overlaps(c))).map(p=>changeComparison(p,change.date,Math.min(now,stamp))).filter(r=>r.before!==undefined);
+ const before=controls.reduce((s,r)=>s+r.before,0),after=controls.reduce((s,r)=>s+r.after,0);
+ const base={before:target.before,after:target.after,controlBefore:before,controlAfter:after,controls:controls.length,concurrent};
+ if(concurrent)return {...base,label:'Birden çok değişiklik',reason:'Aynı ürünün karşılaştırma döneminde başka değişiklik kaydı var. Etkileri ayrı değerlendiremeyiz.'};
+ if(controls.length<3)return {...base,label:'Karşılaştırma grubu küçük',reason:'En az 3 uygun diğer aktif ürün gerekiyor. Dönemde değişiklik kaydı olan veya tam geçmişi olmayan ürünler dışarıda.'};
+ if(target.before===0||target.before+target.after<3||before<5||after<5)return {...base,label:'Satış örneği yetersiz',reason:'Üründe başlangıç satışı ve toplam en az 3 adet; diğer ürünlerde her dönemde en az 5 adet gerekiyor. Bu eşikler istatistiksel güven garantisi değildir.'};
+ const productPercent=(target.after/target.before-1)*100,controlPercent=(after/before-1)*100,difference=productPercent-controlPercent;
+ return {...base,productPercent,controlPercent,difference,label:difference>5?'Diğer ürünlerden daha iyi hareket':difference< -5?'Diğer ürünlerden daha zayıf hareket':'Diğer ürünlerle benzer hareket',reason:'Yüzde değişimleri arasındaki betimsel fark. Sonuç değişikliğin satışa neden olduğunu kanıtlamaz; sezon, reklam, fiyat ve başka etkiler ayrıştırılmadı.'};
+}
+if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary,supportSummary,changeAssessment};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;root.supportSummary=supportSummary;root.changeAssessment=changeAssessment;}
 })(globalThis);

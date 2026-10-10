@@ -7,7 +7,7 @@ Tamamlandı: salt okunur Etsy ürün/satış bağlantısı, ürün görünümü,
 Sıradaki aşamalar:
 
 1. Tamamlandı — satış–destek yükü. Ürün başına olay türü, harcanan dakika ve çözüldü durumu. Müşteri kişisel verilerini kaydetmeden destek zamanı/satış oranı. Mesaj API erişimi varsayılmaz.
-2. Değişiklik değerlendirmesi. Önce/sonra ürün hareketiyle karşılaştırılabilir aktif ürün grubunun genel hareketini ayrı göster. Küçük örnek, eşzamanlı değişiklik, sezon etkisi ve veri kapsamını belirt; nedensellik iddiası yapma.
+2. Tamamlandı — değişiklik değerlendirmesi. Önce/sonra ürün hareketiyle karşılaştırılabilir aktif ürün grubunun genel hareketini ayrı göster. Küçük örnek, eşzamanlı değişiklik, sezon etkisi ve veri kapsamını belirt; nedensellik iddiası yapma.
 3. Yeni ürün kontrolü. API'den erişilebilir başlık, etiket, görsel ve açıklama verileriyle eksik bilgi işaretleri. Teknik baskı garantisi veya SEO sıralama garantisi verme. Yeni yayımlama takvimi ve aday eşleştirmesi.
 4. Gelir/gider. Gerçekten erişilen Etsy ücret/iade verilerini kullanıcı girdisinden ayır; aynı para birimi/dönemle net gelir. Eksik maliyetle net kâr sunma.
 5. Sürüm ve yedek. Yeni sürüm bildirimi, kullanıcı onaylı güvenilir güncelleme, bağlantı/veri yedeğini koruma. Anahtarlar paylaşılabilir JSON yedeğine girmez.

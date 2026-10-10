@@ -62,5 +62,10 @@ function weeklySummary(products,updated,now=Date.now()){
  });
  return {ready:true,from:new Date(end-7*day).toISOString().slice(0,10),to:new Date(end-day).toISOString().slice(0,10),rows,current:rows.filter(r=>r.ready).reduce((s,r)=>s+r.current,0),previous:rows.filter(r=>r.ready).reduce((s,r)=>s+r.previous,0)};
 }
-if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;}
+function familySummary(products,assignments={}){
+ const groups=new Map();
+ for(const p of products){const name=assignments[String(p.id)]||'Sınıflandırılmadı';if(!groups.has(name))groups.set(name,{name,products:0,known:0,quantity:0,selling:0,money:{}});const g=groups.get(name);g.products++;const r=p.periods?.find(r=>r.days===90);if(p.salesAvailable===false||!r)continue;g.known++;g.quantity+=r.quantity;if(r.quantity>0)g.selling++;if(r.currency&&r.revenue!==null)g.money[r.currency]=(g.money[r.currency]||0)+r.revenue;}
+ return [...groups.values()].map(g=>({...g,perProduct:g.known?g.quantity/g.known:null})).sort((a,b)=>b.quantity-a.quantity);
+}
+if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;}
 })(globalThis);

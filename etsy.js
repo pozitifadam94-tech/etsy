@@ -15,6 +15,11 @@ async function pages(route){const all=[];for(let offset=0;offset<100000;offset+=
 function summarize(listings,receipts,now=Date.now()){
  return listings.map(l=>{const created=l.original_creation_timestamp||l.creation_timestamp;const age=created?Math.max(0,Math.floor((now-created*1000)/86400000)):null;const periods=[30,60,90].map(days=>{const start=Math.max((created||0)*1000,now-days*86400000);const sales=receipts.filter(r=>r.is_paid&&!r.is_canceled&&(r.create_timestamp||r.creation_timestamp)*1000>=start).flatMap(r=>r.transactions||[]).filter(t=>t.listing_id===l.listing_id);const currencies=new Set(sales.map(t=>t.price?.currency_code).filter(Boolean));return {days,orders:sales.length,quantity:sales.reduce((s,t)=>s+(t.quantity||0),0),revenue:currencies.size<=1?sales.reduce((s,t)=>s+(t.price?.amount||0)/(t.price?.divisor||100)*(t.quantity||0),0):null,currency:currencies.size===1?[...currencies][0]:null};});const daily={};for(const r of receipts){if(!r.is_paid||r.is_canceled)continue;const stamp=(r.create_timestamp||r.creation_timestamp)*1000;if(!Number.isFinite(stamp))continue;const day=new Date(stamp).toISOString().slice(0,10);for(const t of r.transactions||[]){if(t.listing_id!==l.listing_id)continue;daily[day]=(daily[day]||0)+(t.quantity||0);}}return {daily,id:l.listing_id,title:l.title,url:l.url||'https://www.etsy.com/listing/'+l.listing_id,state:l.state,created,age,price:l.price,image:l.images?.[0]?.url_570xN||l.images?.[0]?.url_fullxfull||null,periods,favorites:l.num_favorers??null};});
 }
+function bundleAnalysis(listings,receipts){
+ const active=new Set(listings.map(l=>String(l.listing_id))),counts=new Map(),pairs=new Map();let baskets=0;
+ for(const r of receipts){if(!r.is_paid||r.is_canceled)continue;const ids=[...new Set((r.transactions||[]).filter(t=>Number(t.quantity)>0).map(t=>String(t.listing_id)).filter(id=>active.has(id)))].sort();if(!ids.length)continue;baskets++;for(const id of ids)counts.set(id,(counts.get(id)||0)+1);for(let a=0;a<ids.length;a++)for(let b=a+1;b<ids.length;b++){const key=ids[a]+':'+ids[b];pairs.set(key,(pairs.get(key)||0)+1);}}
+ return {baskets,pairs:[...pairs].map(([key,count])=>{const ids=key.split(':');return {ids,count,leftBaskets:counts.get(ids[0]),rightBaskets:counts.get(ids[1]),label:count>=3?'Paket araştırmasına aday':'Veri yetersiz',share:baskets?count/baskets:null};}).sort((a,b)=>b.count-a.count)};
+}
 async function loadActive(shopId,requestPages=pages,request=api){
  const diagnostics=[];
  let listings;
@@ -42,7 +47,7 @@ async function sync(){
   persist({...data,snapshot:{updated,listingCount:listings.length,products,diagnostics,salesUpdated:null},error:null});
   stage='Satislar';const receipts=await pages('/shops/'+id+'/receipts?min_created='+Math.floor((Date.now()-90*86400000)/1000));
   for(const r of receipts)r.transactions=await pages('/shops/'+id+'/receipts/'+r.receipt_id+'/transactions');
-  persist({...data,snapshot:{updated,listingCount:listings.length,receiptCount:receipts.length,transactionCount:receipts.reduce((s,r)=>s+(r.transactions?.length||0),0),products:summarize(listings,receipts).map(p=>({...p,salesAvailable:true})),diagnostics,salesUpdated:new Date().toISOString()},error:null});
+  persist({...data,snapshot:{updated,listingCount:listings.length,receiptCount:receipts.length,transactionCount:receipts.reduce((s,r)=>s+(r.transactions?.length||0),0),bundles:bundleAnalysis(listings,receipts),products:summarize(listings,receipts).map(p=>({...p,salesAvailable:true})),diagnostics,salesUpdated:new Date().toISOString()},error:null});
  }catch(e){persist({...data,error:stage+': '+e.message});}finally{busy=false;}
 }
 function status(){return {configured:!!data.key,connected:!!data.tokens,shop:data.shopName||null,busy,error:data.error||null,snapshot:data.snapshot||null};}
@@ -61,4 +66,4 @@ async function handle(req,res,url){const respond=(code,value)=>{res.writeHead(co
  }catch(e){respond(400,{error:e.message});}
 }
 function start(){if(data.tokens)void sync();const timer=setInterval(()=>{if(data.tokens)void sync();},30*60000);timer.unref();}
-module.exports={handle,start,summarize,loadActive};
+module.exports={handle,start,summarize,loadActive,bundleAnalysis};

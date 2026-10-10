@@ -62,3 +62,11 @@ Yeni sürümde günlük satış adetlerinin gelmesi için bir kez başarılı se
 Günlük öneride İnceledim, öneriyi aynı durum devam ettiği sürece 7 gün gizler; durum değişirse öneri daha erken geri gelir. 3/7 gün sonra ertelemesi, seçilen süre bitene kadar öneriyi gizler. Bu işlemler Etsy ilanını değiştirmez. Gizlenen önerileri yeniden göster tüm işaretleri temizler. Kayıtlar tarayıcıda tutulur ve JSON yedeğine dahildir.
 
 Haftalık özet, son satış snapshot'ının gününden önceki 7 tam UTC gününü, ondan önceki ayrık 7 günle karşılaştırır. Bugün dışarıda kalır. Karşılaştırılabilir ürünler en az 14 günlük, günlük satış verisi bulunan aktif ilanlardır. Bu ürünlerin toplamı mağaza geneli toplamı olarak sunulmaz. Toplam 3 adetten az satış küçük örnek olarak işaretlenir. Son 90 günlük veri içinde ilk gözlenen satış yaşam boyu ilk satış değildir. Eski ve eksik veri ayrı gösterilir. Sonuçları görmek için bir kez senkronizasyon yap.
+
+## Paket adayları ve ürün aileleri
+
+Son 90 günlük ödenmiş, iptal edilmemiş siparişlerde birlikte alınan aktif ilan çiftleri hesaplanır. Aynı siparişte tekrar eden satırlar veya çoklu adetler aynı çifti tekrar saydırmaz. En az üç ayrı siparişte ortak alışveriş araştırma adayıdır; daha düşük sayılar veri yetersiz olarak gösterilir. Bu eşik istatistiksel güven veya paket satış garantisi değildir. Yalnızca çift sayıları saklanır; sipariş kimliği ve müşteri bilgisi tutulmaz.
+
+Ürün detayında aile adı verilebilir; atamalar tarayıcıda saklanır ve JSON yedeğine dahildir. Aile tablosu ürün sayısı, satış verisi olan ürün sayısı, satış gören ürün sayısı ve ürün başına adet gösterir. Farklı para birimleri ayrı tutulur. Aileler ürün yaşı, sezon, trafik veya reklam için normalize edilmez; niş talebi/kârlılık sıralaması sayılmaz.
+
+Yeni sürümle bir kez Şimdi güncelle yaparak paket özetini getir. Etsy bağlantısı Windows kullanıcı klasöründe korunduğu için proje güncellemesinde yeniden anahtar girmek gerekmez.

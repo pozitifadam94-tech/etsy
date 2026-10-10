@@ -154,7 +154,7 @@ function dailyBrief(snapshot,records={},now=Date.now()){
  const plans=shares.filter(r=>r.status==='planned'&&r.date<=date);
  for(const r of plans)tasks.push({key:'share:'+r.id,kind:'sharing',id:r.id,title:r.title,priority:90,date:r.date,label:'Paylaşım planı hazır',reason:r.channel+' · Planlanan tarih: '+r.date,target:'sharing'});
  for(const p of products){
-  const id=String(p.id),trend=salesTrend(p,snapshot?.salesUpdated||snapshot?.updated,now);
+  const id=String(p.id),trend=p.decision||salesTrend(p,snapshot?.salesUpdated||snapshot?.updated,now);
   const hidden=(records.actions||[]).some(a=>a.product===id&&a.until>now&&(a.kind==='snoozed'||a.label===trend.label));
   if(fresh&&trend.priority===4&&!hidden)tasks.push({key:'product:'+id,kind:'products',product:id,title:p.title,priority:trend.priority===4?70:40,label:trend.label,reason:trend.reason,target:'daily',review:true});
   if(p.age!==null&&p.age!==undefined&&p.age<30){const audit=listingChecks(p);const needsCheck=audit.missing>0||audit.checks.some(c=>['type','format','digital'].includes(c.id)&&c.status==='review');if(needsCheck&&records.inspections?.[id]?.fingerprint!==audit.fingerprint)tasks.push({key:'audit:'+id,kind:'products',product:id,title:p.title,priority:60,label:'Yeni ürünün içeriğini incele',reason:audit.unknown?'Bazı ilan bilgileri alınmadı; önce ürün verisini güncelle.':'Başlık, görseller ve dijital teslim açıklamasını kontrol et.',target:'listing-audit'});}

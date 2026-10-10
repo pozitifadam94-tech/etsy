@@ -1,3 +1,23 @@
+## 1.5.0 — Tek sürümde günlük çalışma alanı
+
+Önce eski uygulamadan JSON yedek indir. Eski sunucu penceresini kapat, yeni ZIP’i ayrı klasöre çıkar ve `windows-start.cmd` dosyasını çalıştır. İlk açılışı eski kayıtlarının bulunduğu **aynı tarayıcıda, http://localhost:3000 adresinde** yap. Eski tarayıcı kayıtları ortak yerel depoya otomatik taşınır. İlk açılışı başka tarayıcıda yaptıysan eski tarayıcıdan da bir kez aç; farklı eski kayıtlar mevcut depoyu ezmeden otomatik yedek olarak korunur. Ayarlar’dan yedek seçebilirsin.
+
+Bağlantı anahtarları Windows kullanıcı klasöründe kaldığı için yeniden girilmez. Araştırma JSON yedeğinde anahtar yoktur. Yeni sürüm tam çalışma alanı yedeği üretir; önceki düz JSON yedeklerini de yükler. Ortak kayıtlar, geçmiş ve son 30 otomatik yedek `%LOCALAPPDATA%\STLNicheLab` klasöründe bulunur. Tarayıcıyı temizlemek ortak yerel kayıtları silmez. İlk taşımadan **önce** tarayıcı verisini temizleme.
+
+Bir kez `windows-shortcut.cmd` çalıştırarak masaüstü kısayolu oluşturabilirsin. Kısayol sunucu penceresini küçültülmüş açar; pencereyi kapatırsan takip durur. Aynı 1.5.0 sürümü zaten açıksa ikinci sunucu başlatılmaz. Daha eski pencere açıksa önce kapat. Node.js 20+ gereksinimi sürer; otomatik yükleyici veya dosya değiştiren otomatik güncelleyici eklenmedi.
+
+- **Ürünler → Otomatik sonuçlar:** Düzenlemeler form doldurmadan izlenir; gözlem günü hariç 14 tam gün sonra sonuç değerlendirilir.
+- **Ürünler → Mağaza hafızası:** Artık aktif listede bulunmayan ürünler ve toplanmış eski günler korunur.
+- **Ürünler → STL dosyasını kontrol et:** Dosyayı sürükle; döndür, boyutlarını gör, temel geometri uyarılarını incele. En fazla 25 MB / 300.000 üçgen. Büyük dosyalarda topoloji kontrolü yapılmaz; birim ve baskı başarısı bilinmez. Dosya yerelde çalışır, yüklenmez.
+- **Pazar gözlemi:** Başlığında STL olan dijital örnekleri, mağaza dağılımını ve fiyat aralığını incele. Talep veya arama hacmi ölçümü değildir.
+- **Ayarlar → Otomatik yedekten geri yükle:** Mevcut durum önce ayrıca yedeklenir. Aynı anda açık sekmeler eski kayıtla üzerine yazamaz; çakışmada sekme kopyasını indirip yenile.
+
+Müşteri mesajlarına otomatik erişim yok. Konu önerisi anahtar kelimelerle çalışır, çeviri yapmaz. Masaüstü bildirimini istersen Ayarlar’dan açabilirsin: yalnızca uygulama açıkken, kaydettiğin takip tarihleri için çalışır; Star Seller cevap süresini ölçmez.
+
+---
+
+Aşağıdaki önceki sürüm notları tarihsel kurulum ayrıntılarıdır. Güncel veri deposu ve kullanım için yukarıdaki 1.5.0 bölümü geçerlidir.
+
 # Windows'ta baslatma
 
 1. https://nodejs.org/ adresinden Node.js LTS Windows kurulumunu yap. Ek ucretli arac veya npm paketi gerekmez.

@@ -1,19 +1,17 @@
 # Mağaza çalışma alanı yol haritası
 
-Amaç: günlük işleri tek çalışma alanından incelemek; Etsy'de değişiklikleri başlangıçta kullanıcı yapar. Ücretli AI API veya n8n zorunlu değildir. Her aşama çalışan veriyle doğrulanıp kullanıcı tarafından denenir.
+1.5.0 tek sürüm olarak günlük işi azaltmaya odaklanır. Ücretli AI/n8n gerektirmez, Etsy’ye yazmaz.
 
-Tamamlandı: salt okunur Etsy ürün/satış bağlantısı, ürün görünümü, günlük öncelik ve erteleme, haftalık özet, ürün detayları/değişiklik günlüğü, paket adayları, ürün aileleri, satış–destek yükü ve açık müşteri işleri.
+Tamamlananlar: ortak yerel kayıt deposu ve tarayıcıdan taşıma; günlük/geri yükleme öncesi yedek; kalıcı ürün/satış kapsamı ve aktif listeden çıkan ürün geçmişi; küçük örnekte temkinli karar durumları; otomatik düzenleme → 14 tam gün sonra sonuç karşılaştırması; yeni ürünlerin ilk yayın dönemleri; dijital STL pazar örneği elemesi ve yakın kullanım fikirleri; yerel STL görüntüleme/temel geometri kontrolü/aynı dosya tespiti; mesaj konu önerisi ve isteğe bağlı kayıtlı iş bildirimi; masaüstü kısayolu ve ikinci sunucu koruması.
 
-1.4.0 ile ana akış otomatik Etsy verilerine taşındı: tek bölüm gösteren altı öğeli menü, Bugün ana ekranı, 14 günlük satış grafiği, otomatik ürün grupları, tek seçimle pazar takibi ve senkronizasyonlar arası otomatik ilan değişikliği gözlemi. Manuel ölçümlere dayanan araçlar isteğe bağlı alana alındı; önceki kayıtlar korunur. Kullanıcı tercihi: günlük kullanım için elle veri doldurma gerektirmeyen, sade ve sakin arayüz. Yeni özellikler bu tercihe göre seçilmeli; ölçüm erişilemiyorsa eksikliği görev yağmuruna çevirmemeli.
+Gerçek veri veya dış doğrulama gerektiren sonraki işler:
 
-Sıradaki aşamalar:
+1. Kullanım sonrası ölç: hazır karşılaştırma kaç kez incelendi, kullanıcı hangi öneriyi uyguladı, tekrar kayıt azaldı mı? Zaman veya satış artışı tahmini uydurma; yalnızca gerçek geri bildirimle değerlendir.
+2. Trafik erişimi doğrulanırsa görünmeme ile dönüşüm sorununu ayır. Erişilemiyorsa zorunlu manuel alan açma.
+3. Biriken geçmişle grup bazlı sezon ve daha uzun dönem değerlendirmeleri. Eksik önceki yıl verisini üretme.
+4. Gerçek ücret/iade verisi erişimi doğrulanırsa kapsamı belirtilmiş finans hesabı. Mevcut ürün bedelini net kâr sayma.
+5. Mesaj/bildirim erişimini güncel Etsy belgeleri ve izinlerle ayrıca doğrula. Mevcut şablon/iş bildirimi Star Seller otomasyonu değildir.
+6. Topluluk ve benzer araç araştırmasını ağ erişimi sağlandığında gerçek kaynaklarla tamamla. Kısıtlı ilan örneklemini talep veya kesin satış verisine dönüştürme.
+7. Kolay yükleyici ve kullanıcı başlattığı doğrulanmış güncelleme paketi. Mevcut sürüm ZIP’le güncellenir; otomatik dosya değişimi yok.
 
-1. Tamamlandı — satış–destek yükü. Ürün başına olay türü, harcanan dakika ve çözüldü durumu. Müşteri kişisel verilerini kaydetmeden destek zamanı/satış oranı. Mesaj API erişimi varsayılmaz.
-2. Tamamlandı — değişiklik değerlendirmesi. Önce/sonra ürün hareketiyle karşılaştırılabilir aktif ürün grubunun genel hareketini ayrı göster. Küçük örnek, eşzamanlı değişiklik, sezon etkisi ve veri kapsamını belirt; nedensellik iddiası yapma.
-3. Tamamlandı — yeni ürün kontrol listesi. API'den erişilebilir başlık, etiket, görsel ve açıklama verileriyle eksik bilgi işaretleri. Teknik baskı garantisi veya SEO sıralama garantisi verme. Yeni yayımlama takvimi ve aday eşleştirmesi.
-4. İlk sürüm tamamlandı — gelir/gider defteri. API ürün bedelleri, manuel ek gelir/gider/iade ve para birimi ayrımı var. Otomatik ücret/iade bağlantısı henüz yok. Gerçekten erişilen Etsy ücret/iade verilerini kullanıcı girdisinden ayır; aynı para birimi/dönemle net gelir. Eksik maliyetle net kâr sunma.
-5. İlk sürüm tamamlandı — sürüm bildirimi ve güvenli indirme yönlendirmesi. Dosyalar otomatik değiştirilmez. Yeni sürüm bildirimi, kullanıcı onaylı güvenilir güncelleme, bağlantı/veri yedeğini koruma. Anahtarlar paylaşılabilir JSON yedeğine girmez.
-6. İlk sürüm tamamlandı — rakip/anahtar kelime takibi. Halka açık ilk 100 ilan gözlemi, fiyat farkı, yeni gözlenen ilanlar ve API erişim hataları desteklenir. İlk veri alımının çalıştığı kullanıcı tarafından bildirildi. API izinlerini ve metrik erişimini doğrula, yalnızca desteklenen verilerle periyodik gözlem. Kesin rakip satışları ve arama hacmi uydurulmaz.
-7. İlk sürüm tamamlandı — paylaşım takibi. Plan, günlük hatırlatma, manuel kaynağı/tarihi belirtilmiş tıklama veya ziyaret ölçümü ve önce/sonra 7 günlük satış adetleri var. Otomatik paylaşım/trafik bağlantısı henüz yok. Pinterest gibi kaynaklarda paylaşım tarihi, gerçek erişim/ziyaret verisi varsa kaynağıyla sonuç takibi. Etsy'ye günlük giriş veya yapay etkinlik tek başına sıralama faydası sayılmaz.
-
-İleride ayrı değerlendirilecek: yazma erişimi, ilan değişikliği/yayımlama, Pinterest paylaşımı ve tek tuşla onaylı işlemler. Şu an hiçbir ilan otomatik değiştirilmez/silinmez, paylaşım veya müşteri mesajı gönderilmez. Önce değişikliklerin önizlemesi, onay, geri alma ve denetim kaydı tasarlanmalıdır.
+İlan değiştirme/yayımlama/silme, sosyal paylaşım ve müşteri mesajı otomasyonu ayrı ileriki kapsamdır. Önce önizleme, kullanıcı onayı, geri alma ve denetim kaydı gerekir. Günlük girişin veya yapay etkinliğin tek başına Etsy sıralamasını artırdığı varsayılmaz.

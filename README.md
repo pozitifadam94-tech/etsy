@@ -1,65 +1,73 @@
-# STL Atölyesi
+# STL Atölyesi — 1.5.0
 
-GoatDesgnShop için Türkçe, kişisel mağaza çalışma alanı. Günlük kullanımda ürünleri, satış hareketini ve pazar gözlemlerini Etsy’den otomatik alır. Ücretli AI API, n8n, harici npm paketi veya abonelik gerektirmez.
+GoatDesgnShop için ücretsiz, kişisel ve Türkçe çalışma alanı. Amaç Etsy Stats’ı yeniden göstermekten öte **ürün seçmeden önce elemek, değişikliklerin sonucunu takip etmek ve STL dosyasını incelemek**. Ücretli AI API, n8n, harici npm paketi veya abonelik gerekmez.
 
-## Başlatma
+## Başlatma ve güncelleme
 
-Windows için [WINDOWS.md](WINDOWS.md) adımlarını kullan. Node.js 20+ kurulu olduğunda `windows-start.cmd` paneli açar. Geliştirme ortamında:
+Windows adımları [WINDOWS.md](WINDOWS.md) içindedir. Node.js 20+ ile `windows-start.cmd` paneli açar. `windows-shortcut.cmd` masaüstü kısayolu oluşturur. Aynı sürümü tekrar açmak ikinci sunucu başlatmaz. Güncelleme hâlâ yedek + ZIP’i yeni klasöre çıkartma ile yapılır; program dosyaları otomatik değiştirilmez. Kısayol yeni klasörde tekrar oluşturulmalıdır.
 
 ```sh
 cd /workspace/etsy
 npm start
+npm test
+npm run build:pages
 ```
 
-Sunucu varsayılan olarak 3000 portunu kullanır. `npm test` veri hesaplarını, gözlemleri ve sürüm karşılaştırmasını doğrular. `npm run build:pages` statik dosyaları `docs/app` içine kopyalar. Kaynaklarda hiçbir Etsy anahtarı bulunmamalıdır.
+Sunucu varsayılan olarak yalnızca localhost:3000 dinler. API okuma/yazma istekleri yerel socket ve Host kontrolünden geçer; POST aynı Origin gerektirir. Bu bulut ortamında gerçek mağaza anahtarları kullanılmaz. Etsy verisiyle çalışan tarayıcı testleri temsili API yanıtları kullanır; gerçek HTTP ve dosya deposu ayrıca sınanır.
 
-## Günlük kullanım — 1.4.0
+## Günlük akış
 
-- **Bugün:** bağlantı durumu, aktif ürünler, son 30 gün satış adedi, inceleme önerileri ve yeni ürünler. En fazla üç öneriyle başlar; diğerleri isteğe bağlı gösterilir. Satış düşüşleri, gerçek ilan bilgisi eksikleri ve varsa kaydedilmiş işler öne çıkar. Düşük satışlı her ürüne veya içeriği tamamlanmış her yeni ilana görev üretilmez.
-- **Ürünler:** Etsy’den gelen görseller, fiyat ve son 30 gün satış adedi. Detayda 30/60/90 gün sonuçları, ilan kontrolleri ve otomatik gözlenen düzenlemeler bulunur. Not formları kapalı başlar.
-- **Satışlar:** iki ayrık haftanın karşılaştırması ve son 14 tam UTC gününün satış grafiği. Günlük adetler okunabilir tabloda da bulunur; tamamlanmamış bugün grafiğe girmez.
-- **Ürün grupları:** başlık ve etiketlerden otomatik gruplandırma. Önceki kullanıcı atamaları korunur. Paket adayları ayrı, açılabilir alandadır.
-- **Pazar gözlemi:** gruplarından türetilmiş en fazla üç hazır İngilizce arama; birini seçince yerel takip kaydı eklenir. Başka mağaza/arama ekleme formu isteğe bağlıdır.
-- **Ayarlar:** bağlantı, sürüm kontrolü, yedekler ve önceki isteğe bağlı araçlar.
+1. **Bugün:** Sıradaki ürün işi ve hazır otomatik karşılaştırmalar. “Uygulama senin için ne yaptı?” alanı fark edilen düzenlemeleri, okunmamış sonuçları ve geçmişi korunan ürünleri sayar; zaman kazancı veya satış artışı uydurmaz.
+2. **Ürünler:** Otomatik Etsy ürünleri, kanıt gücü açıklanan karar durumları. Kaldırma/yayımlama/değiştirme yapılmaz. Otomatik sonuçlar, mağaza hafızası ve STL kontrolü buradan açılır.
+3. **Satışlar:** Destekleyici haftalık özet ve 14 tam UTC gün grafiği. Aktif ürün örneklemi mağazanın tüm geçmişi sayılmaz.
+4. **Ürün grupları:** Başlık/etiket kuralları ve varsa önceki kullanıcı atamaları. Aynı siparişte birlikte alınan modeller paket araştırmasına aday olabilir; satış garantisi yoktur.
+5. **Pazar gözlemi:** Ürün seçmeden önce dijital STL uygunluğu, farklı mağaza sayısı, örneklem yoğunlaşması ve para birimine göre fiyat aralığı. Yakın kullanım alanları kural tabanlı araştırma fikirleridir; ölçülmüş talep değildir.
+6. **Ayarlar:** Ortak kayıt durumu, yedekler, bağlantı, sürüm ve isteğe bağlı önceki araçlar. Ana günlük akışta manuel ölçüm girmek zorunlu değildir.
 
-Yalnızca seçilen bölüm gösterilir. URL bölüm bağlantıları, tarayıcı geri/ileri ve mobil menü desteklenir. Yeni veri gelmediyse arka plan kontrolü açık tabloları veya klavye odağını sıfırlamaz. Günlük kullanım için manuel form doldurmak gerekmez.
+## Ürün kararları
 
-## Etsy bağlantısı ve kapsam
+Güncel satış verisi ve tamamlanmış günler kullanılır. “Deneme aşamasında”, “Satış sinyali var”, “Gerileme izleniyor”, “Karar verilemiyor” durumları ve gerekçeleri gösterilir. Düzenli sinyal için son 14 günde en az 5 adet ve 3 farklı satış günü gerekir. Güçlü olmayan iki satıştan bire düşüş günlük iş yaratmaz. Gerileme, üç ayrık 14 günlük dönemde yeterli örnek ve süren düşüş gerektirir. Bu eşikler istatistiksel güven aralığı veya Etsy standardı değildir; trafik, sezon ve giderler bilinmez. Satışsızlık tek başına kaldırma önerisi değildir.
 
-Yerel panelde Etsy uygulamanın Keystring ve Shared secret değerlerini gir; OAuth ile kendi mağazanı bağla. Callback kaydı `http://localhost:3000/oauth/callback` olmalıdır. Bağlantı salt okunurdur; `listings_r shops_r transactions_r` izinleri kullanılır. Ürünler başlangıçta ve sunucu açıkken 30 dakikada bir yenilenir. Bilgisayar kapalıyken takip çalışmaz. Etsy erişimi bu bulut ortamında doğrulanamaz; kullanıcının Windows bağlantısının ve ilk ürün/satış verisinin çalıştığı bildirildi.
+Yeni ürünlerin ilk yayın sonrası 14/30/60/90 tam gün değerlendirmesi form doldurmadan oluşur. Eski ürünün ilk dönemi toplanmış veri kapsamı dışındaysa sonuç üretilmez. Günlük “İnceledim” ve erteleme eski kayıtlarla uyumludur.
 
-Yalnızca şu anda aktif ilanlar ve son 90 günün ödenmiş, iptal edilmemiş sipariş satırları hesaplanır. Satış adedi dosya/ürün miktarıdır; satış satırı benzersiz sipariş sayısı değildir. Ürün bedelleri net kâr, toplam mağaza geliri veya Etsy ödeme bakiyesi değildir. İadeler, ücretler, vergiler, görüntülenme, kaynak trafiği ve mesajlar bu bağlantıda otomatik alınmaz. Bunlar tahminle doldurulmaz. Farklı para birimleri ayrı tutulur.
+## Mağaza hafızası ve otomatik sonuçlar
 
-Eski, eksik ve doğrulanmış sıfır veriler ayrı gösterilir. Günlük satış önerileri ve grafik için en fazla iki günlük snapshot gerekir. Trend karşılaştırması en az 60 günlük ilanlarda iki ayrık 30 günlük dönemi kullanır; küçük örnek kesin sonuç sayılmaz. Sıfır başlangıçtan yüzde artış üretilmez. Eksik ürünler grafikte/satış toplamında dışarıda tutulur ve kapsam açıklanır.
+Her ürün eşitlemesinde başlık, açıklama, etiket, görsel kimlik/sıra, fiyat ve ilan türü farkları gözlenir. İlk gözlem, yeni ID, önceki bilinmeyen alan, etiket sırası ve eşdeğer fiyat böleni değişiklik sayılmaz. Gözlem zamanı tam düzenleme zamanı değildir.
 
-## Otomatik ilan değişikliği gözlemi
+Düzenleme otomatik izlenir: önceki gözlemin gününden önceki 14 tam gün ile yeni gözlemin **ertesi gününden** başlayan 14 tam gün karşılaştırılır. İki gözlem arası iki günden fazlaysa düzenleme zamanı yeterince bilinmez. Eksik günler, eski satış kaydı, küçük örnek veya çakışan değişiklikler ayrı belirtilir. En az üç uygun diğer aktif ürünün hareketi ayrıca gösterilir. Manuel değişiklik notları da çakışma kontrolüne girer. Önce/sonra farkı nedensellik kanıtlamaz. “Sonucu gördüm” günlük kartı kaldırır, geçmişi silmez. Ekran son 24 değerlendirmeyi gösterir; günlük sonuç listesi son 100 gözlemden türetilir. Daha eski gözlemler tam yedekte korunur.
 
-Her başarılı ürün alımı önceki snapshot ile karşılaştırılır. Bilinen başlık, açıklama, etiket, görsel kimlik/sırası, ilan türü ve fiyat alanlarındaki farklar kaydedilir. İlk gözlem ve önceki veride olmayan alanlar düzenleme sayılmaz. Yeni görülen ilan geçmişten beri var olabilir. Etiket sırası ve aynı tutarı ifade eden farklı fiyat bölenleri fark sayılmaz. Satış veya favori değişimi ilan düzenlemesi değildir.
+Yerel geçmiş aktif listeden çıkan ürünleri ve makbuzlarda bulunan aktif olmayan ürün satışlarını korur. “Aktif listede yok” silinmiş anlamına gelmez. Son 90 günlük alınan günler her başarılı satış eşitlemesinde güncellenir, tekrar toplanmaz. Daha eski **toplanmış** günler kalır. En eski kısmi gün ve tamamlanmamış bugün tam gün kapsamına girmez. Satış aşaması başarısızsa önceki geçmiş ve kapsam korunur. Geçmişi hiç toplanmamış günler uydurulmaz; bir yıl veri birikmeden yıllık sezon analizi sunulmaz.
 
-En fazla 100 gözlem saklanır. Kayıt önceki ve yeni gözlem zamanını gösterir; tam Etsy düzenleme zamanı bilinmez. Gözlem, değişikliğin satışa etkisini veya nedenini kanıtlamaz. Otomatik gözlemler manuel değişiklik değerlendirmelerine karıştırılmaz. Satış izni başarısız olsa da alınmış ürün bilgileri ve gözlem kaydı korunur.
+## STL dosya kontrolü
 
-## Otomatik gruplar ve pazar takibi
+Dosyayı sürükleyerek ikili/ASCII STL aç, döndür ve boyutları gör. En fazla 25 MB / 300.000 üçgen. Web Worker dosyayı yerelde analiz eder; dosya sunucuya veya Etsy’ye gönderilmez. Önizleme en fazla 2.500 yüz örnekler, tüm geometri ölçülür. 100.000 üçgenden büyük modellerde kenar/topoloji analizi yapılmaz ve bunun bilinmediği gösterilir.
 
-Gruplar basit başlık/etiket kurallarıyla önerilir; dosya içeriği veya yapay zekâ değerlendirmesi değildir. Tanınmayanlar Diğer modeller olur. Kullanıcının önceki grup ataması önceliklidir. Grup tablosu yalnızca satış verisi olan aktif ürünleri toplar; ürün sayısı, yaşı, sezon ve trafik farklarını talep/kârlılık olarak yorumlamaz.
+Temel açık kenar, ikiden fazla yüz birleşimi, tutarsız yüz yönü ve sıfıra yakın alanlı üçgen kontrolleri yapılır. STL birim içermez; mm/cm/inç seçimi kullanıcının yorumudur. Kendi kendini kesme, destek ihtiyacı, malzeme veya baskı başarısı doğrulanmaz. Dosya düzenlenmez. İsteğe bağlı kontrol özeti saklanır; ham dosya saklanmaz. Aynı dosya içeriği SHA-256 ile tekrar tanınır; farklı kodlanmış aynı geometrinin eşleştiği iddia edilmez. Dosya adından kullanıcı tıklamasıyla Etsy araması açılabilir; başlık dosya içeriğinden çıkarılmaz.
 
-Hazır aramalar, bilinen 90 günlük satış adedine göre sıralanan ürün gruplarından türetilir; talep veya düşük rekabet önerisi değildir. Zaten takip edilen kelimeler tekrar önerilmez. API erişimi sağlanıyorsa en fazla 10 takip, her takipte ilk 100 ilan ve son 30 başarılı gözlem tutulur. Sunucu açıkken 6 saati dolan takipler yenilenir. Manuel yenilemede en az 10 dakika, hata sonrası bir saat, 429 sonrası altı saat beklenir. Önceki başarılı veri hatada korunur.
+## Etsy bağlantısı ve sınırlar
 
-API sonuç sayısı arama hacmi veya dijital STL toplamı değildir. Yeni gözlenen ilan yeni yayımlanmış, örneklemden çıkan ilan silinmiş sayılmaz. Fiyat farkı ortak ilanlarda aynı para birimiyle hesaplanır. Dijital fiyat medyanı yalnızca `type=download` ilanlarda hesaplanır; boş örneklem, tür eksikliği ve fiyat eksikliği ayrı açıklanır. Rakiplerin özel satışlarına erişilmez.
+Anahtarları yalnızca yerel formda gir; OAuth callback `http://localhost:3000/oauth/callback`. Kullanılan izinler `listings_r shops_r transactions_r`. Salt okunur bağlantı, başlangıçta ve sunucu açıkken 30 dakikada bir mağaza eşitlemesi. Bilgisayar/uygulama kapalıyken takip yoktur.
 
-## Önceki manuel araçlar
+Son 90 günlük ödenmiş, iptal edilmemiş sipariş satırları alınır. Adet, ürün miktarıdır; satır sayısı benzersiz sipariş sayısı değildir. Ürün bedeli net kâr, Etsy bakiyesi veya ücret/iade sonrası gelir değildir. Görüntülenme, kaynak trafiği, reklam, iadeler ve Etsy ücretleri bu bağlantıda otomatik alınmaz. Para birimleri ayrı tutulur.
 
-Niş notları, rakip ilan kayıtları, adaylar, 30/60/90 günlük deneyler, manuel ürün karnesi, müşteri işleri, paylaşım ölçümleri ve gider defteri Ayarlar’dan açılır. Eski JSON yedekleri desteklenir; bu araçlar silinmedi, ana günlük akıştan çıkarıldı. Kaydedilmiş müşteri işleri ve paylaşım planları varsa günlük listede görünebilir. Formları doldurmamak canlı takibi engellemez.
+Pazar takipleri en fazla 10 mağaza/arama, her gözlem ilk 100 ilan ve son 30 başarılı pazar gözlemiyle sınırlıdır. Aramalar yeni ilana göre sıralanır; tüm pazarın temsilî örneklemi değildir. Sunucu açıkken altı saatlik yenileme, manuel en az 10 dakika, hata sonrası 1 saat/429 sonrası 6 saat bekleme sürer. Başlığında STL geçen `download` ilanlar ayrı incelenir. Dosya türünün gerçekten STL olduğu doğrulanmaz. Sonuç sayısı arama hacmi değildir; rakip özel satışlarına erişilmez. Yeni gözlenen ilan yeni yayımlanmış, örneklemden çıkan ilan kaldırılmış sayılmaz.
 
-Mesaj yardımcısı ücretsiz İngilizce/Türkçe şablonlar ve mevcut ChatGPT kullanımına kopyalanabilir profil metni sağlar. AI API, otomatik çeviri veya Etsy mesaj erişimi içermez. Müşteri mesajı saklanmaz, yedeğe eklenmez veya sunucuya gönderilmez. Paylaşımlar platforma otomatik gönderilmez.
+## Müşteri yardımcısı
 
-Manuel değişiklik notlarında önce/sonra 14 tam UTC gün ve diğer uygun aktif ürünler karşılaştırılır; küçük örnek, eşzamanlı düzenleme ve yetersiz tarih kapsamı belirtilir. Paylaşım kayıtlarında önce/sonra 7 günlük tüm kaynaklardan gelen satış adetleri gösterilir; kaynak dönüşümü veya nedensellik çıkarılmaz. Gider defteri yalnızca kayıtlı gelir eksi gider/iade bakiyesidir; otomatik net kâr sunmaz. İnceledim işareti trend aynı kaldığı sürece yedi gün, erteleme seçilen üç/yedi gün öneriyi gizler.
+İngilizce/Türkçe şablonlar mağazanın sınırlarını korur: fiziksel ürün/baskı hizmeti, özel tasarım/model değişikliği ve baskı garantisi sunulmaz. Yapıştırılan mesajda anahtar kelimelerden konu önerilir; belirsizlikte kullanıcı seçer. Yapay zekâ anlayışı veya otomatik çeviri yoktur. Karmaşık mesaj mevcut ChatGPT kullanımına profil ile kopyalanabilir. Mesaj metni kaydedilmez, yedeğe girmez, sunucuya gönderilmez. Kullanıcı isterse kişisel bilgileri çıkarır.
 
-## Veriler ve güncelleme
+İsteğe bağlı masaüstü bildirimi yalnızca uygulama açıkken **elle kaydedilmiş** müşteri takip tarihleri içindir. Etsy gelen kutusu otomatik okunmaz; Star Seller cevap süresi hesaplanmaz, müşteriye mesaj gönderilmez. Gelen kutusuna doğrudan bağlantı vardır.
 
-Araştırma, not, manuel grup, inceleme ve isteğe bağlı kayıtlar tarayıcı `localStorage` alanında kalır; JSON olarak yedeklenebilir. Aynı tarayıcı ve aynı adres/port gerekir. GitHub Pages ile yerel panel farklı depolama alanlarıdır. Aday görselleri en fazla 5 MB PNG/JPEG/WebP’den 640 piksel JPEG’e küçültülür; yedeğe dahildir.
+## Ortak depo, taşıma ve yedek
 
-Anahtarlar, OAuth tokenları, ürün snapshot’ı, otomatik gözlemler ve pazar takibi `%LOCALAPPDATA%\STLNicheLab\connection.json` dosyasında tutulur. Dosya proje dışındadır; ZIP güncellemesi bağlantıyı değiştirmez. Dosya şifreli değildir ve anahtar içerir; paylaşılmaz. Güvenli bağlantı değerleri kaynak koduna, GitHub’a, tarayıcıya veya araştırma JSON yedeğine eklenmez. Pazar gözlem geçmişi ayrı düğmeyle anahtar içermeyen JSON olarak indirilebilir; otomatik geri yüklemesi yoktur.
+Yerel kayıtlar `%LOCALAPPDATA%\STLNicheLab\workspace.json` içinde; günlük ve geri yükleme öncesi yedekler `backups` klasöründedir. Son 30 yedek saklanır. Tarayıcı ilk açılışta eski kayıtları taşır; farklı eski kayıt varsa mevcut depoyu ezmeden ayrıca yedekler. İlk taşıma eski tarayıcı ve aynı localhost adresinde yapılmalı; sonrasında tarayıcı temizlense de ortak kayıtlar kalır. Birden fazla sekmede eski revizyonla kayıt üzerine yazılmaz; hata alan sekmenin kopyası dışa aktarılabilir.
 
-Sürüm kontrolü yalnızca resmi GitHub raw `package.json` adresine gider; Etsy kimlik bilgilerini göndermez. Dosyalar otomatik değiştirilmez. Güncelleme: yedek indir, eski sunucuyu kapat, ZIP’i ayrı klasöre çıkart ve başlat. GitHub Pages statik arayüzü gösterir; canlı API bağlantısı veya gizli anahtar deposu değildir.
+Tam yedek araştırma, notlar, dosya kontrol özetleri, mağaza geçmişi, pazar gözlemleri ve okunmuş sonuçları içerir. Önceki düz araştırma yedekleri desteklenir. Geçersiz yedek mevcut veriyi değiştirmez; başarılı geri yükleme öncesinde mevcut durum ayrıca yedeklenir. Etsy anahtarları/tokens tam yedeğe girmez. Dosya depo sınırı 32 MB; aşılırsa kaydetme hatası açıkça gösterilir. Bozuk yerel depo sessizce sıfırlanmaz: kaydetme durur, Ayarlar’dan geçerli yedek geri yüklenebilir; özgün bozuk dosya `recovery` klasöründe korunur.
 
-Hiçbir Etsy ilanı otomatik değiştirilmez, yayımlanmaz veya silinmez. Uygulama ürün tut/kaldır, kâr veya satış garantisi vermez.
+Etsy anahtarları, OAuth tokenları ve güncel snapshot ayrı `connection.json` içinde kalır; şifreli değildir ve paylaşılmamalıdır. ZIP değişimi bu dosyaları değiştirmez. Statik GitHub Pages önizlemesi yerel API/depo içermez; orada eski tarayıcı depolaması kullanılır. STL yerel dosya görüntüleme statik arayüzde de çalışabilir.
+
+## Doğrulama ve sonraki değerlendirme
+
+`npm test` geçmiş, karar, otomatik sonuç, pazar, STL ve gerçek HTTP depo akışını doğrular. Ayrıca Chromium’da kayıt taşıma/koruma, sonuç okuma, dosya Worker/görüntüleme/aynı içerik, müşteri konu önerisi, statik önizleme ve 320–1440 piksel kullanım akışları kontrol edilir. Windows COM kısayolu bu Linux ortamında çalıştırılamaz.
+
+Genel ürün değerlendirmesi, ulaşılabilen/engellenen araştırma kaynakları ve kalan eksikler [REVIEW.md](REVIEW.md) içinde. Yeni özellik sayısı başarı ölçüsü değildir; hedef daha az tekrar kayıt ve daha sağlam ürün kararlarıdır.

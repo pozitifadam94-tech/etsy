@@ -19,6 +19,6 @@ set "PORT=3000"
 set "OPEN_BROWSER=1"
 echo Panel baslatiliyor. Tarayici otomatik acilacak.
 echo Bu pencereyi kapatirsan yerel sunucu durur.
-node server.js
+node scripts\launch.js
 if errorlevel 1 pause
 endlocal

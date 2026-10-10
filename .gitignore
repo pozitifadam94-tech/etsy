@@ -3,3 +3,7 @@ node_modules/
 .env.*
 connection.json
 connection.json.tmp
+workspace.json
+workspace.json.tmp
+backups/
+recovery/

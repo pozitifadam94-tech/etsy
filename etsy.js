@@ -4,11 +4,12 @@ const path=require('node:path');
 const os=require('node:os');
 const crypto=require('node:crypto');
 const market=require('./market');
+const {workspace}=require('./workspace');
 const dir=process.env.STL_DATA_DIR||path.join(process.env.LOCALAPPDATA||os.homedir(),'STLNicheLab');
 const file=path.join(dir,'connection.json');
 let data={};try{data=JSON.parse(fs.readFileSync(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw Error('Yerel baglanti dosyasi okunamiyor. Dosyayi silmeden once yedekle.');}
 let pending=null,busy=false;
-function persist(next){fs.mkdirSync(dir,{recursive:true,mode:0o700});const tmp=file+'.tmp';fs.writeFileSync(tmp,JSON.stringify(next),{mode:0o600});fs.renameSync(tmp,file);data=next;}
+function persist(next){const watchesChanged=JSON.stringify(next.watches||[])!==JSON.stringify(data.watches||[]);fs.mkdirSync(dir,{recursive:true,mode:0o700});const tmp=file+'.tmp';fs.writeFileSync(tmp,JSON.stringify(next),{mode:0o600});fs.renameSync(tmp,file);data=next;if(watchesChanged){const store=workspace();if(!store.status().error)store.research(next.watches||[]);}}
 async function jsonFetch(url,options={}){const r=await fetch(url,{...options,signal:AbortSignal.timeout(30000)});if(!r.ok){const error=new Error(r.status===429?'Etsy istek siniri: daha sonra tekrar dene.':`Etsy erisim hatasi (${r.status}). Uygulama izinlerini ve baglantiyi kontrol et.`);error.status=r.status;throw error;}return r.json();}
 async function tokenRequest(body){return jsonFetch('https://api.etsy.com/v3/public/oauth/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body)});}
 async function access(){if(!data.tokens)throw Error('Once Etsy hesabini bagla.');if(data.expires>Date.now()+60000)return data.tokens.access_token;const tokens=await tokenRequest({grant_type:'refresh_token',client_id:data.key,refresh_token:data.tokens.refresh_token});persist({...data,tokens:{...data.tokens,...tokens},expires:Date.now()+tokens.expires_in*1000});return tokens.access_token;}
@@ -48,9 +49,13 @@ async function sync(){
   const products=summarize(listings,[]).map(p=>({...p,periods:[],salesAvailable:false}));
   const observations=[...(data.snapshot?.observations||[]),...listingObservations(data.snapshot,products,updated)].slice(-100);
   persist({...data,snapshot:{updated,listingCount:listings.length,products,diagnostics,observations,salesUpdated:null},error:null});
+  workspace().capture(data.snapshot);
   stage='Satislar';const receipts=await pages('/shops/'+id+'/receipts?min_created='+Math.floor((Date.now()-90*86400000)/1000));
   for(const r of receipts)r.transactions=await pages('/shops/'+id+'/receipts/'+r.receipt_id+'/transactions');
-  persist({...data,snapshot:{updated,listingCount:listings.length,receiptCount:receipts.length,transactionCount:receipts.reduce((s,r)=>s+(r.transactions?.length||0),0),bundles:bundleAnalysis(listings,receipts),observations,products:summarize(listings,receipts).map(p=>({...p,salesAvailable:true})),diagnostics,salesUpdated:new Date().toISOString()},error:null});
+  const activeIds=new Set(listings.map(l=>String(l.listing_id))),inactive=new Map();
+  for(const r of receipts)for(const t of r.transactions||[])if(!activeIds.has(String(t.listing_id))&&/^\d+$/.test(String(t.listing_id)))inactive.set(String(t.listing_id),{listing_id:t.listing_id,title:t.title||'İlan #'+t.listing_id,state:'inactive',price:t.price});
+  persist({...data,snapshot:{updated,listingCount:listings.length,receiptCount:receipts.length,transactionCount:receipts.reduce((s,r)=>s+(r.transactions?.length||0),0),bundles:bundleAnalysis(listings,receipts),observations,products:summarize(listings,receipts).map(p=>({...p,salesAvailable:true})),salesProducts:summarize([...inactive.values()],receipts).map(p=>({...p,salesAvailable:true})),diagnostics,salesUpdated:new Date().toISOString()},error:null});
+  workspace().capture(data.snapshot);
  }catch(e){persist({...data,error:stage+': '+e.message});}finally{busy=false;}
 }
 let marketBusy=false,marketQueued=false;
@@ -89,5 +94,7 @@ async function handle(req,res,url){const respond=(code,value)=>{res.writeHead(co
  respond(404,{error:'Bulunamadi'});
  }catch(e){respond(400,{error:e.message});}
 }
-function start(){if(data.tokens)void sync();if(data.key)void syncMarket();const marketTimer=setInterval(()=>{if(data.key)void syncMarket();},30*60000);marketTimer.unref();const timer=setInterval(()=>{if(data.tokens)void sync();},30*60000);timer.unref();}
-module.exports={handle,start,summarize,loadActive,bundleAnalysis};
+function canRestore(){return !busy&&!marketBusy;}
+function restoreResearch(watches){persist({...data,watches});}
+function start(){const store=workspace();if(!store.status().error){if(data.snapshot)store.capture(data.snapshot);if(data.watches?.length)store.research(data.watches);}if(data.tokens)void sync();if(data.key)void syncMarket();const marketTimer=setInterval(()=>{if(data.key)void syncMarket();},30*60000);marketTimer.unref();const timer=setInterval(()=>{if(data.tokens)void sync();},30*60000);timer.unref();}
+module.exports={handle,start,summarize,loadActive,bundleAnalysis,canRestore,restoreResearch};

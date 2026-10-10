@@ -1,0 +1,26 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spawn}=require('node:child_process');
+test('Gerçek sunucu: yerel kayıt, eski revizyon, Origin/Host koruması, yedek ve sağlıklı açılış',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'stl-api-'));
+ const child=spawn(process.execPath,['server.js'],{cwd:__dirname,env:{...process.env,PORT:'0',HOST:'localhost',STL_DATA_DIR:dir,OPEN_BROWSER:'0'},stdio:['ignore','pipe','pipe']});
+ t.after(()=>{child.kill();fs.rmSync(dir,{recursive:true,force:true});});
+ const port=await new Promise((resolve,reject)=>{let out='';const timer=setTimeout(()=>reject(Error('Sunucu başlatılamadı')),10000);child.stdout.on('data',chunk=>{out+=chunk;const m=out.match(/hazır; port (\d+)/);if(m){clearTimeout(timer);resolve(Number(m[1]));}});child.on('error',reject);child.on('exit',code=>{if(code)reject(Error('Sunucu kapandı: '+code));});});
+ const base='http://localhost:'+port;
+ const request=(route,body,headers={})=>fetch(base+route,body?{method:'POST',headers:{Origin:base,'Content-Type':'application/json',...headers},body:JSON.stringify(body)}:{headers});
+ assert.equal((await (await request('/api/health')).json()).app,'stl-atelier');
+ const s={niches:[{id:'n',name:'Türkçe heykel',query:'heykel stl',competition:null}],listings:[],candidates:[]};
+ assert.equal((await request('/api/workspace',{state:s,revision:0},{Origin:'https://attacker.example'})).status,403);
+ const foreignHost=await new Promise((resolve,reject)=>{const req=require('node:http').get(base+'/api/workspace',{headers:{Host:'evil.example'}},res=>{res.resume();resolve(res.statusCode);});req.on('error',reject);});assert.equal(foreignHost,403);
+ const saved=await request('/api/workspace',{state:s,revision:0});assert.equal(saved.status,200);assert.equal((await saved.json()).state.niches[0].name,'Türkçe heykel');
+ assert.equal((await request('/api/workspace',{state:s,revision:0})).status,409);
+ const backup=await (await request('/api/workspace/export')).json();assert.equal(backup.schema,1);assert(!('key' in backup));assert(!('tokens' in backup));
+ assert.equal((await request('/api/workspace/restore',{bundle:{...backup,history:{}},revision:1})).status,400);
+ assert.equal((await (await request('/api/workspace')).json()).revision,1);
+ assert.equal((await request('/api/workspace/restore',{bundle:backup,revision:1})).status,200);
+ const status=await (await request('/api/workspace')).json();assert(status.backups.some(b=>b.name.includes('before-restore')));
+ assert.equal((await request('/api/workspace/restore',{name:'../connection.json',revision:2})).status,400);
+ const health=await (await request('/api/health')).json();
+ const launcher=spawn(process.execPath,['scripts/launch.js'],{cwd:__dirname,env:{...process.env,PORT:String(port),OPEN_BROWSER:'0'},stdio:['ignore','pipe','pipe']});
+ const output=await new Promise(resolve=>{let out='';launcher.stdout.on('data',c=>out+=c);launcher.on('close',code=>resolve({code,out}));});
+ assert.equal(output.code,0);assert.match(output.out,/ikinci sunucu başlatılmadı/);assert.equal(health.version,require('./package.json').version);
+});

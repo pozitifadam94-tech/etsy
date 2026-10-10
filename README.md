@@ -70,3 +70,9 @@ Son 90 günlük ödenmiş, iptal edilmemiş siparişlerde birlikte alınan aktif
 Ürün detayında aile adı verilebilir; atamalar tarayıcıda saklanır ve JSON yedeğine dahildir. Aile tablosu ürün sayısı, satış verisi olan ürün sayısı, satış gören ürün sayısı ve ürün başına adet gösterir. Farklı para birimleri ayrı tutulur. Aileler ürün yaşı, sezon, trafik veya reklam için normalize edilmez; niş talebi/kârlılık sıralaması sayılmaz.
 
 Yeni sürümle bir kez Şimdi güncelle yaparak paket özetini getir. Etsy bağlantısı Windows kullanıcı klasöründe korunduğu için proje güncellemesinde yeniden anahtar girmek gerekmez.
+
+## Müşteri işleri ve destek yükü
+
+Canlı ürün detayında sorun türü, tarih, harcanan tam dakika, takip tarihi, kısa not ve açık/çözüldü durumuyla iş kaydedilir. Müşteri mesajının tamamını veya kişisel bilgileri ekleme. Kayıtlar tarayıcıda tutulur ve JSON yedeğine dahildir. Etsy mesajları okunmaz/gönderilmez. Açık işler günlük önceliklerde ve Müşteri işleri ekranında gösterilir; düzenleme, çözme/yeniden açma ve silme desteklenir. Takip tarihi geldiğinde panelde işaretlenir; dış bildirim gönderilmez.
+
+Destek tablosu İstanbul takvimindeki son 30 günün kayıtlı olay/süresini, tüm tarihlerdeki açık işleri ve API'nin kayan 30 günlük satış adedini gösterir. Dakika/adet yalnızca kayıt ve en az 3 satış adedi varsa gösterilir. Eski/eksik API verisinde oran verilmez. Tarih kapsamları tam eşit olmadığından yaklaşık bir göstergedir; müşteri sorun oranı, net kâr veya toplam gerçek destek yükü değildir. Kaydedilmeyen olaylar bilinmez. Aktif ürün listesinden çıkan ürünlerin mevcut destek kayıtları silinmez; başlık yedeğiyle gösterilir, satış oranı bilinmiyor olur.

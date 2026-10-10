@@ -2,11 +2,11 @@
 
 Amaç: günlük işleri tek çalışma alanından incelemek; Etsy'de değişiklikleri başlangıçta kullanıcı yapar. Ücretli AI API veya n8n zorunlu değildir. Her aşama çalışan veriyle doğrulanıp kullanıcı tarafından denenir.
 
-Tamamlandı: salt okunur Etsy ürün/satış bağlantısı, ürün görünümü, günlük öncelik ve erteleme, haftalık özet, ürün detayları/değişiklik günlüğü, paket adayları, ürün aileleri.
+Tamamlandı: salt okunur Etsy ürün/satış bağlantısı, ürün görünümü, günlük öncelik ve erteleme, haftalık özet, ürün detayları/değişiklik günlüğü, paket adayları, ürün aileleri, satış–destek yükü ve açık müşteri işleri.
 
 Sıradaki aşamalar:
 
-1. Satış–destek yükü. Ürün başına olay türü, harcanan dakika ve çözüldü durumu. Müşteri kişisel verilerini kaydetmeden destek zamanı/satış oranı. Mesaj API erişimi varsayılmaz.
+1. Tamamlandı — satış–destek yükü. Ürün başına olay türü, harcanan dakika ve çözüldü durumu. Müşteri kişisel verilerini kaydetmeden destek zamanı/satış oranı. Mesaj API erişimi varsayılmaz.
 2. Değişiklik değerlendirmesi. Önce/sonra ürün hareketiyle karşılaştırılabilir aktif ürün grubunun genel hareketini ayrı göster. Küçük örnek, eşzamanlı değişiklik, sezon etkisi ve veri kapsamını belirt; nedensellik iddiası yapma.
 3. Yeni ürün kontrolü. API'den erişilebilir başlık, etiket, görsel ve açıklama verileriyle eksik bilgi işaretleri. Teknik baskı garantisi veya SEO sıralama garantisi verme. Yeni yayımlama takvimi ve aday eşleştirmesi.
 4. Gelir/gider. Gerçekten erişilen Etsy ücret/iade verilerini kullanıcı girdisinden ayır; aynı para birimi/dönemle net gelir. Eksik maliyetle net kâr sunma.

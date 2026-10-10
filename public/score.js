@@ -67,5 +67,10 @@ function familySummary(products,assignments={}){
  for(const p of products){const name=assignments[String(p.id)]||'Sınıflandırılmadı';if(!groups.has(name))groups.set(name,{name,products:0,known:0,quantity:0,selling:0,money:{}});const g=groups.get(name);g.products++;const r=p.periods?.find(r=>r.days===90);if(p.salesAvailable===false||!r)continue;g.known++;g.quantity+=r.quantity;if(r.quantity>0)g.selling++;if(r.currency&&r.revenue!==null)g.money[r.currency]=(g.money[r.currency]||0)+r.revenue;}
  return [...groups.values()].map(g=>({...g,perProduct:g.known?g.quantity/g.known:null})).sort((a,b)=>b.quantity-a.quantity);
 }
-if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;}
+function supportSummary(products,events,now=Date.now()){
+ const format=t=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Istanbul'}).format(new Date(t));const cutoff=format(now-29*86400000),end=format(now);
+ const ids=new Set([...products.map(p=>String(p.id)),...events.map(e=>e.product)]);
+ return [...ids].map(id=>{const p=products.find(p=>String(p.id)===id),all=events.filter(e=>e.product===id),recent=all.filter(e=>e.date>=cutoff&&e.date<=end);const sales=p?.periods?.find(r=>r.days===30);const quantity=p?.salesAvailable===false?null:sales?.quantity??null;const minutes=recent.reduce((s,e)=>s+e.minutes,0);return {id,title:p?.title||all[0]?.title||'İlan #'+id,events:recent.length,open:all.filter(e=>!e.resolved).length,minutes,quantity,perUnit:recent.length&&quantity>=3?minutes/quantity:null};}).filter(r=>r.events||r.open).sort((a,b)=>b.open-a.open||b.minutes-a.minutes);
+}
+if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary,supportSummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;root.supportSummary=supportSummary;}
 })(globalThis);

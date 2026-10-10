@@ -51,5 +51,16 @@ function changeComparison(product,date,now=Date.now()){
  const count=(from,to)=>Object.entries(product.daily).reduce((s,[date,q])=>{const t=Date.parse(date+'T00:00:00Z');return s+(t>=from&&t<to?q:0);},0);
  return {before:count(at-14*day,at),after:count(at,at+14*day),reason:'Önceki ve sonraki 14 tam gün. Değişiklik günü sonrası döneme dahildir. Satış farkı değişikliğin etkisini kanıtlamaz.'};
 }
-if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;}
+function weeklySummary(products,updated,now=Date.now()){
+ if(!updated||!Number.isFinite(Date.parse(updated))||now-Date.parse(updated)>2*86400000)return {ready:false,reason:'Haftalık özet için güncel satış senkronizasyonu gerekiyor.',rows:[]};
+ const day=86400000,end=Math.floor(Date.parse(updated)/day)*day;
+ const rows=products.map(p=>{
+  if(p.salesAvailable===false||!p.daily||p.age===null||p.age<14)return {id:p.id,title:p.title,ready:false,label:'Veri / süre yetersiz'};
+  const count=(from,to)=>Object.entries(p.daily).reduce((s,[date,q])=>{const stamp=Date.parse(date+'T00:00:00Z');return s+(stamp>=from&&stamp<to?Number(q):0);},0);
+  const current=count(end-7*day,end),previous=count(end-14*day,end-7*day),older=count(end-90*day,end-7*day);
+  return {id:p.id,title:p.title,ready:true,current,previous,delta:current-previous,firstObserved:current>0&&older===0,label:current+previous<3?'Örnek küçük':current>previous?'Artıyor':current<previous?'Azalıyor':'Aynı'};
+ });
+ return {ready:true,from:new Date(end-7*day).toISOString().slice(0,10),to:new Date(end-day).toISOString().slice(0,10),rows,current:rows.filter(r=>r.ready).reduce((s,r)=>s+r.current,0),previous:rows.filter(r=>r.ready).reduce((s,r)=>s+r.previous,0)};
+}
+if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;}
 })(globalThis);

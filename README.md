@@ -56,3 +56,9 @@ Canlı ürünlerin son 30 günü, 60 günlük toplamdan 30 günlük toplam çık
 Ürün detayında görsel/başlık/fiyat/açıklama değişikliklerini not edebilirsin. Bu notlar tarayıcıda saklanır ve JSON yedeğine dahildir. Yeni API snapshot'ı notları silmez. Önceki/sonraki 14 günlük adet karşılaştırması değişiklik sonrası 14 tam gün tamamlanınca yapılır. Önceki dönem 90 günlük veri kapsamına sığmalı ve ilan o dönemde açık olmalıdır. Hesap günlük UTC satış toplamları kullanır, değişiklik günü sonraki pencereye dahildir. Bu karşılaştırma nedensellik kanıtı değildir; eşzamanlı değişiklikler, sezon ve reklamlar sonucu etkiler.
 
 Yeni sürümde günlük satış adetlerinin gelmesi için bir kez başarılı senkronizasyon gerekir. Günlük satışlar kişisel müşteri bilgisi içermez. Eski snapshot'larda günlük veri bulunmuyorsa karşılaştırma beklemede gösterilir.
+
+## İnceledim, erteleme ve haftalık özet
+
+Günlük öneride İnceledim, öneriyi aynı durum devam ettiği sürece 7 gün gizler; durum değişirse öneri daha erken geri gelir. 3/7 gün sonra ertelemesi, seçilen süre bitene kadar öneriyi gizler. Bu işlemler Etsy ilanını değiştirmez. Gizlenen önerileri yeniden göster tüm işaretleri temizler. Kayıtlar tarayıcıda tutulur ve JSON yedeğine dahildir.
+
+Haftalık özet, son satış snapshot'ının gününden önceki 7 tam UTC gününü, ondan önceki ayrık 7 günle karşılaştırır. Bugün dışarıda kalır. Karşılaştırılabilir ürünler en az 14 günlük, günlük satış verisi bulunan aktif ilanlardır. Bu ürünlerin toplamı mağaza geneli toplamı olarak sunulmaz. Toplam 3 adetten az satış küçük örnek olarak işaretlenir. Son 90 günlük veri içinde ilk gözlenen satış yaşam boyu ilk satış değildir. Eski ve eksik veri ayrı gösterilir. Sonuçları görmek için bir kez senkronizasyon yap.

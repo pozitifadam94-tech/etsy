@@ -30,5 +30,26 @@ function performance(records){
  if(stale){label='Veriyi güncelle';reason='Son gözlem 30 günden eski. Güncel veri olmadan bu öneriyi uygulama.';}
  return {score:stale?null:score,label,reason,conversion,net,period:r.period,views:r.views,orders:r.orders,increment:prior?{days:r.period-prior.period,views:r.views-prior.views,orders:r.orders-prior.orders}:null};
 }
-if(typeof module!=='undefined')module.exports={evaluate,performance};else {root.evaluate=evaluate;root.performance=performance;}
+function salesTrend(product,updated,now=Date.now()){
+ const recent=product.periods?.find(p=>p.days===30),total=product.periods?.find(p=>p.days===60);
+ if(product.salesAvailable===false||!recent||!total)return {label:'Veri bekleniyor',reason:'Satış senkronizasyonu henüz tamamlanmadı.',priority:0};
+ if(!updated||now-Date.parse(updated)>2*86400000)return {label:'Güncelle',reason:'Satış kaydı eski; önce senkronizasyonu yenile.',priority:5};
+ if(product.age===null||product.age<60)return {label:'Yeni / süre yetersiz',reason:'İki tam 30 günlük dönemi karşılaştırmak için ilan en az 60 günlük olmalı.',priority:1,current:recent.quantity};
+ const current=recent.quantity,previous=total.quantity-current;
+ if(previous<0)return {label:'Veriyi kontrol et',reason:'60 günlük toplam 30 günlük toplamdan düşük.',priority:5};
+ const delta=current-previous;
+ if(current+previous<3)return {label:'Örnek küçük',reason:'İki dönemde toplam 3 adetten az satış var. Görünürlük ve sunumu incele; kaldırma kararı verme.',priority:current===0?3:1,current,previous,delta};
+ const label=delta>0?'Satış artıyor':delta<0?'Satış azalıyor':'Satış aynı';
+ return {label,current,previous,delta,percent:previous?Math.round(delta/previous*100):null,priority:delta<0?4:2,reason:delta<0?'Ana görsel, başlık veya fiyatı incele. Tek değişkeni değiştirip sonucu izle.':delta>0?'Mevcut ilanı izle; benzer ürün fikrini küçük bir denemeyle test et.':'Mevcut sunumu izle; yeni bir değişiklik için somut gerekçe ara.'};
+}
+function changeComparison(product,date,now=Date.now()){
+ const at=Date.parse(date+'T00:00:00Z'),day=86400000;
+ if(!Number.isFinite(at)||!product.daily)return {reason:'Bu kayıt için günlük satış verisi henüz yok.'};
+ if(now<at+14*day)return {reason:'Sonrası karşılaştırması için değişiklikten sonra 14 tam gün bekle.'};
+ if(at-14*day<now-90*day)return {reason:'Önceki dönem 90 günlük veri kapsamı dışında.'};
+ if(!product.created||product.created*1000>at-14*day)return {reason:'Değişiklik öncesinde 14 tam günlük ilan geçmişi yok.'};
+ const count=(from,to)=>Object.entries(product.daily).reduce((s,[date,q])=>{const t=Date.parse(date+'T00:00:00Z');return s+(t>=from&&t<to?q:0);},0);
+ return {before:count(at-14*day,at),after:count(at,at+14*day),reason:'Önceki ve sonraki 14 tam gün. Değişiklik günü sonrası döneme dahildir. Satış farkı değişikliğin etkisini kanıtlamaz.'};
+}
+if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;}
 })(globalThis);

@@ -48,3 +48,11 @@ Araştırma görevleri eksik örnekleri, eksik sonuç sayısını, 30 günden es
 Mesaj yardımcısı ücretsiz sabit İngilizce/Türkçe şablonlar ve mevcut ChatGPT kullanımına aktarılabilecek profil+mesaj metni sağlar. Otomatik çeviri, AI API veya Etsy mesaj erişimi yoktur. İngilizce metin düzenlenirse Türkçe açıklama otomatik güncellenmez. Müşteri mesajı sunucuya gönderilmez veya uygulama yedeğine kaydedilmez.
 
 Etsy uygulamasının onaylandığı kullanıcı tarafından bildirildi; API bağlantısı henüz yapılmadı. GitHub Pages güvenli sunucu veya gizli anahtar deposu değildir. Keystring/Shared secret/OAuth token kaynak koduna, tarayıcıya veya GitHub'a eklenmemelidir. Kendi mağaza verilerine erişim için uygun OAuth izinleri ve kayıtlı callback gerekir. API'nin Etsy Stats görüntülenmelerini veya mesajlarını sağladığı varsayılmamalıdır; desteklenmeyen ölçümler manuel girilir. Ücretsiz kişisel sunucu seçeneği bilgisayar açıkken çalışabilir; sürekli ücretsiz barındırma garanti edilmez.
+
+## Günlük öncelikler, trend ve değişiklik günlüğü
+
+Canlı ürünlerin son 30 günü, 60 günlük toplamdan 30 günlük toplam çıkarılarak elde edilen önceki 30 günle adet bazında karşılaştırılır. İlan yaşı 60 günden küçükse eşit dönem karşılaştırması yapılmaz. Toplam 3 adetten az satış küçük örnek olarak belirtilir. Başlangıç sıfırsa yüzde artış üretilmez. İki günden eski satış snapshot'ı güncelleme gerektirir. Öncelikler inceleme önerisidir; Etsy ilanını değiştirmez veya silmez.
+
+Ürün detayında görsel/başlık/fiyat/açıklama değişikliklerini not edebilirsin. Bu notlar tarayıcıda saklanır ve JSON yedeğine dahildir. Yeni API snapshot'ı notları silmez. Önceki/sonraki 14 günlük adet karşılaştırması değişiklik sonrası 14 tam gün tamamlanınca yapılır. Önceki dönem 90 günlük veri kapsamına sığmalı ve ilan o dönemde açık olmalıdır. Hesap günlük UTC satış toplamları kullanır, değişiklik günü sonraki pencereye dahildir. Bu karşılaştırma nedensellik kanıtı değildir; eşzamanlı değişiklikler, sezon ve reklamlar sonucu etkiler.
+
+Yeni sürümde günlük satış adetlerinin gelmesi için bir kez başarılı senkronizasyon gerekir. Günlük satışlar kişisel müşteri bilgisi içermez. Eski snapshot'larda günlük veri bulunmuyorsa karşılaştırma beklemede gösterilir.

@@ -12,3 +12,10 @@ test('Sıfır satış ve yeterli 90 gün örneğinde duraklatmayı değerlendir'
 test('Birikimli dönemler toplanmaz, son fark hesaplanır',()=>{const r=performance([record({period:30,views:100,orders:2,revenue:10}),record({views:300,orders:6,revenue:30})]);assert.equal(r.views,300);assert.equal(r.increment.orders,4);assert.equal(r.label,'Devam et');});
 test('Tutarsız dönem ve eski gözlem öneri üretmez',()=>{assert.equal(performance([record({period:30,views:400}),record()]).score,null);assert.equal(performance([record({date:'2020-01-01'})]).label,'Veriyi güncelle');});
 test('Zarar satış başarısından önce değerlendirilir',()=>assert.equal(performance([record({orders:9,revenue:20,cost:30})]).label,'Maliyetleri incele'));
+const {salesTrend,changeComparison}=require('./public/score');
+const snapshot=new Date().toISOString();
+const product={age:90,salesAvailable:true,periods:[{days:30,quantity:8},{days:60,quantity:12}]};
+test('Trend iki ayrı 30 günü kullanır',()=>{const r=salesTrend(product,snapshot);assert.equal(r.previous,4);assert.equal(r.current,8);assert.equal(r.percent,100);assert.equal(r.label,'Satış artıyor');});
+test('Genç, küçük örnekli ve eski kayıt kesin eğilim üretmez',()=>{assert.equal(salesTrend({...product,age:20},snapshot).label,'Yeni / süre yetersiz');assert.equal(salesTrend({...product,periods:[{days:30,quantity:1},{days:60,quantity:2}]},snapshot).label,'Örnek küçük');assert.equal(salesTrend(product,'2020-01-01').label,'Güncelle');});
+test('Sıfır başlangıçtan artışta yüzde uydurulmaz',()=>{assert.equal(salesTrend({...product,periods:[{days:30,quantity:5},{days:60,quantity:5}]},snapshot).percent,null);});
+test('Değişiklik karşılaştırması ayrık ve eşit 14 günlük pencereler kullanır',()=>{const now=Date.parse('2026-10-10T12:00:00Z');const p={created:Date.parse('2026-01-01')/1000,daily:{'2026-09-05':1,'2026-09-19':2,'2026-09-20':3,'2026-10-03':4,'2026-10-04':99}};const r=changeComparison(p,'2026-09-20',now);assert.equal(r.before,2);assert.equal(r.after,7);assert.ok(changeComparison(p,'2026-10-05',now).reason.includes('14 tam gün bekle'));});

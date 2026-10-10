@@ -48,3 +48,7 @@ Sol menudeki Magazam > Urunlerim, canli API snapshot'indaki aktif ilanlari goste
 ## 1.1.0 sürümüne geçiş
 
 Yedek indir, siyah pencereyi kapat, güncel ZIP'i ayrı klasöre çıkart ve windows-start.cmd ile aç. Şimdi güncelle yaparak günlük ürün bedellerini getir. Gelir ve gider ekranından tarih aralığını seçip manuel gider/iade ekleyebilirsin. Başlıktaki Yeni sürüm var mı düğmesi bundan sonra yeni yayımlanan sürümleri kontrol eder. İndirme/güncelleme otomatik değildir; panel açıkken dosyaların üzerine yazılmaz. API anahtarlarını tekrar girmen gerekmez. Araştırma ve defter kayıtların aynı localhost adresindeki aynı tarayıcıda korunur; JSON yedeğini ayrıca sakla.
+
+## 1.2.0 rakip takibini dene
+
+Güncel sürüme geçtikten sonra Rakip ve kelime takibi ekranında örneğin `ballerina stl` aramasını ekle. İlk başarılı gözlemde örneklenen ilan/fiyatlar görünmeli. Erişim hatası çıkarsa yalnızca hata metnini paylaş; anahtar dosyasını gönderme. Anahtarları tekrar girmek gerekmez. Bilgisayar kapalıyken gözlem yapılmaz. İkinci başarılı gözlem fiyat/örneklem değişimini oluşturur. Yenile düğmesine arka arkaya basmak bekleme sürelerini kaldırmaz.

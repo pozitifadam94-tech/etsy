@@ -2,6 +2,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const os=require('node:os');
 const crypto=require('node:crypto');
+const market=require('./market');
 const dir=process.env.STL_DATA_DIR||path.join(process.env.LOCALAPPDATA||os.homedir(),'STLNicheLab');
 const file=path.join(dir,'connection.json');
 let data={};try{data=JSON.parse(fs.readFileSync(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw Error('Yerel baglanti dosyasi okunamiyor. Dosyayi silmeden once yedekle.');}
@@ -50,6 +51,18 @@ async function sync(){
   persist({...data,snapshot:{updated,listingCount:listings.length,receiptCount:receipts.length,transactionCount:receipts.reduce((s,r)=>s+(r.transactions?.length||0),0),bundles:bundleAnalysis(listings,receipts),products:summarize(listings,receipts).map(p=>({...p,salesAvailable:true})),diagnostics,salesUpdated:new Date().toISOString()},error:null});
  }catch(e){persist({...data,error:stage+': '+e.message});}finally{busy=false;}
 }
+let marketBusy=false,marketQueued=false;
+async function publicApi(route){if(!data.key)throw Error('Once yerel Etsy anahtarlarini kaydet.');return jsonFetch('https://openapi.etsy.com/v3/application'+route,{headers:{'x-api-key':data.key+':'+data.secret}});}
+async function syncMarket(force=false){
+ if(marketBusy){marketQueued=true;return;}marketBusy=true;
+ try{for(const target of [...(data.watches||[])]){
+ const last=target.history?.at(-1);if(last&&Date.now()-Date.parse(last.updated)<(force?10*60000:6*3600000))continue;
+ if(target.retryAfter&&Date.now()<target.retryAfter)continue;
+ try{const result=await market.observe(target,publicApi);persist({...data,watches:(data.watches||[]).map(w=>w.id===target.id?{...w,shopId:result.shopId||w.shopId,history:[...(w.history||[]),result.snapshot].slice(-30),error:null,retryAfter:null}:w)});}
+ catch(e){persist({...data,watches:(data.watches||[]).map(w=>w.id===target.id?{...w,error:e.message,retryAfter:Date.now()+(e.status===429?6*3600000:3600000)}:w)});if(e.status===429)break;}
+ }}finally{marketBusy=false;if(marketQueued){marketQueued=false;void syncMarket();}}
+}
+function marketStatus(){return {busy:marketBusy,watches:(data.watches||[]).map(w=>{const current=w.history?.at(-1),previous=w.history?.at(-2);return {id:w.id,kind:w.kind,query:w.query,error:w.error,retryAfter:w.retryAfter||null,current:current||null,comparison:market.compare(previous,current),history:(w.history||[]).map(h=>({updated:h.updated,reportedCount:h.reportedCount,sampled:h.sampled}))};})};}
 function status(){return {configured:!!data.key,connected:!!data.tokens,shop:data.shopName||null,busy,error:data.error||null,snapshot:data.snapshot||null};}
 async function handle(req,res,url){const respond=(code,value)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
  if(!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress)){respond(403,{error:'Yalnizca yerel bilgisayardan erisim.'});return;}
@@ -57,13 +70,22 @@ async function handle(req,res,url){const respond=(code,value)=>{res.writeHead(co
  const expected='http://'+req.headers.host;
  if(req.method==='POST'&&req.headers.origin!==expected){respond(403,{error:'Yerel sayfadan islem yap.'});return;}
  try{
+ if(url.pathname==='/api/etsy/market-export'&&req.method==='GET'){respond(200,{exported:new Date().toISOString(),watches:data.watches||[]});return;}
+ if(url.pathname==='/api/etsy/market'&&req.method==='GET'){respond(200,marketStatus());return;}
+ if(url.pathname==='/api/etsy/market'&&req.method==='POST'){
+ let body='';for await(const c of req){body+=c;if(body.length>4096)throw Error('Istek cok buyuk.');}const input=JSON.parse(body);
+ if(input.action==='add'){const target=market.normalizeTarget(input);if((data.watches||[]).length>=10)throw Error('En fazla 10 takip kaydi eklenebilir.');if((data.watches||[]).some(w=>w.kind===target.kind&&w.query.toLowerCase()===target.query.toLowerCase()))throw Error('Bu takip zaten var.');persist({...data,watches:[...(data.watches||[]),target]});void syncMarket();}
+ else if(input.action==='remove')persist({...data,watches:(data.watches||[]).filter(w=>w.id!==input.id)});
+ else if(input.action==='sync'){if(!data.key)throw Error('Yerel Etsy baglantisini once ayarla.');void syncMarket(true);}
+ else throw Error('Gecersiz takip islemi.');respond(202,{ok:true});return;
+ }
  if(url.pathname==='/api/etsy/status'&&req.method==='GET'){respond(200,status());return;}
- if(url.pathname==='/api/etsy/config'&&req.method==='POST'){let body='';for await(const c of req){body+=c;if(body.length>4096)throw Error('Istek cok buyuk.');}const c=JSON.parse(body);if(!/^[A-Za-z0-9]{5,200}$/.test(c.key)||!/^[A-Za-z0-9]{5,200}$/.test(c.secret))throw Error('Keystring ve Shared secret degerlerini kontrol et.');if(new URL(expected).hostname!=='localhost')throw Error('Baglanti icin http://localhost:3000 adresini kullan.');persist({key:c.key,secret:c.secret,callback:expected+'/oauth/callback'});respond(200,{ok:true});return;}
+ if(url.pathname==='/api/etsy/config'&&req.method==='POST'){let body='';for await(const c of req){body+=c;if(body.length>4096)throw Error('Istek cok buyuk.');}const c=JSON.parse(body);if(!/^[A-Za-z0-9]{5,200}$/.test(c.key)||!/^[A-Za-z0-9]{5,200}$/.test(c.secret))throw Error('Keystring ve Shared secret degerlerini kontrol et.');if(new URL(expected).hostname!=='localhost')throw Error('Baglanti icin http://localhost:3000 adresini kullan.');persist({key:c.key,secret:c.secret,callback:expected+'/oauth/callback',watches:data.watches||[]});respond(200,{ok:true});return;}
  if(url.pathname==='/api/etsy/connect'&&req.method==='POST'){if(!data.key)throw Error('Once anahtarlari yerel forma kaydet.');const verifier=crypto.randomBytes(32).toString('base64url');pending={verifier,state:crypto.randomBytes(24).toString('hex'),until:Date.now()+600000};const q=new URLSearchParams({response_type:'code',client_id:data.key,redirect_uri:data.callback,scope:'listings_r shops_r transactions_r',state:pending.state,code_challenge:crypto.createHash('sha256').update(verifier).digest('base64url'),code_challenge_method:'S256'});respond(200,{url:'https://www.etsy.com/oauth/connect?'+q});return;}
  if(url.pathname==='/oauth/callback'&&req.method==='GET'){const p=pending;pending=null;if(!p||p.until<Date.now()||url.searchParams.get('state')!==p.state)throw Error('Yetkilendirme suresi veya guvenlik kodu gecersiz. Yeniden baglan.');if(!url.searchParams.get('code'))throw Error('Etsy yetkilendirmesi tamamlanmadi.');const tokens=await tokenRequest({grant_type:'authorization_code',client_id:data.key,redirect_uri:data.callback,code:url.searchParams.get('code'),code_verifier:p.verifier});persist({...data,tokens,expires:Date.now()+tokens.expires_in*1000});void sync();res.writeHead(303,{Location:'/'});res.end();return;}
  if(url.pathname==='/api/etsy/sync'&&req.method==='POST'){if(!data.tokens)throw Error('Once Etsy hesabini bagla.');void sync();respond(202,{ok:true});return;}
  respond(404,{error:'Bulunamadi'});
  }catch(e){respond(400,{error:e.message});}
 }
-function start(){if(data.tokens)void sync();const timer=setInterval(()=>{if(data.tokens)void sync();},30*60000);timer.unref();}
+function start(){if(data.tokens)void sync();if(data.key)void syncMarket();const marketTimer=setInterval(()=>{if(data.key)void syncMarket();},30*60000);marketTimer.unref();const timer=setInterval(()=>{if(data.tokens)void sync();},30*60000);timer.unref();}
 module.exports={handle,start,summarize,loadActive,bundleAnalysis};

@@ -44,3 +44,7 @@ Once eski 127.0.0.1 panelinden Yedek indir. Yeni surum localhost adresini acar; 
 ## Magazam urun ekrani
 
 Sol menudeki Magazam > Urunlerim, canli API snapshot'indaki aktif ilanlari gosterir. Kartlar fiyat, favori, ilan yasi, son 30/60/90 gun adetleri ve varsa gorsel icerir. Arama, satis var/yok/yeni filtreleri ve satis/yenilik/ad siralamasi kullanilabilir. Senkronizasyon sayaclari, 0 urun yanitini filtre sonucu bos listesinden ayirir. Yeni surumu ayri klasore indirip eski sunucuyu kapattiktan sonra baslat; LOCALAPPDATA altindaki baglanti dosyasi korundugu icin tekrar anahtar girmek gerekmez. Ilk guncellemeyi bekle veya Simdi guncelle kullan. Sifir urun gorursen sayaci ve magaza adini bildir; connection.json dosyasini gonderme.
+
+## 1.1.0 sürümüne geçiş
+
+Yedek indir, siyah pencereyi kapat, güncel ZIP'i ayrı klasöre çıkart ve windows-start.cmd ile aç. Şimdi güncelle yaparak günlük ürün bedellerini getir. Gelir ve gider ekranından tarih aralığını seçip manuel gider/iade ekleyebilirsin. Başlıktaki Yeni sürüm var mı düğmesi bundan sonra yeni yayımlanan sürümleri kontrol eder. İndirme/güncelleme otomatik değildir; panel açıkken dosyaların üzerine yazılmaz. API anahtarlarını tekrar girmen gerekmez. Araştırma ve defter kayıtların aynı localhost adresindeki aynı tarayıcıda korunur; JSON yedeğini ayrıca sakla.

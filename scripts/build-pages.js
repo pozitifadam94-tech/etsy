@@ -5,3 +5,5 @@ const target=path.join(root,'docs','app');
 fs.mkdirSync(target,{recursive:true});
 for(const file of ['index.html','app.js','score.js','style.css'])fs.copyFileSync(path.join(root,'public',file),path.join(target,file));
 console.log('GitHub Pages uygulama dosyaları hazır.');
+
+fs.writeFileSync(path.join(target,'version.json'),JSON.stringify({version:require('../package.json').version}));

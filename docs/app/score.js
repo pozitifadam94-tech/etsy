@@ -101,5 +101,11 @@ function listingChecks(product){
  add('digital',text==null?'unknown':/digital|dijital|download|indir/i.test(text)?'ok':'review','Dijital teslim açıklaması',text==null?'Açıklama alınmadı.':/digital|dijital|download|indir/i.test(text)?'Dijital/indirme ifadesi var; fiziksel ürün gönderilmediğini açıkça belirtmeyi kontrol et.':'Dijital teslimi açıklayan ifade bulunamadı; fiziksel ürünle karışmayı önlemek için belirt.');
  return {checks,missing:checks.filter(c=>c.status==='missing').length,review:checks.filter(c=>c.status==='review').length,unknown:checks.filter(c=>c.status==='unknown').length,fingerprint:JSON.stringify([product.title,product.description,product.tags,product.imageCount,product.listingType,product.imageIds,product.image])};
 }
-if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary,supportSummary,changeAssessment,listingChecks};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;root.supportSummary=supportSummary;root.changeAssessment=changeAssessment;root.listingChecks=listingChecks;}
+function financeSummary(products,ledger,from,to){
+ const totals=new Map();const get=currency=>{if(!totals.has(currency))totals.set(currency,{currency,automatic:0,income:0,expense:0,refund:0});return totals.get(currency);};let unknown=0;
+ for(const p of products){if(p.salesAvailable===false||!p.dailyMoney||p.moneyComplete===false){unknown++;continue;}for(const [date,money]of Object.entries(p.dailyMoney)){if(date<from||date>to)continue;for(const [currency,amount]of Object.entries(money))get(currency).automatic+=amount;}}
+ for(const row of ledger){if(row.date<from||row.date>to)continue;get(row.currency)[row.kind]+=row.amount;}
+ return {unknown,rows:[...totals.values()].map(t=>({...t,balance:t.automatic+t.income-t.expense-t.refund})).sort((a,b)=>a.currency.localeCompare(b.currency))};
+}
+if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary,supportSummary,changeAssessment,listingChecks,financeSummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;root.supportSummary=supportSummary;root.changeAssessment=changeAssessment;root.listingChecks=listingChecks;root.financeSummary=financeSummary;}
 })(globalThis);

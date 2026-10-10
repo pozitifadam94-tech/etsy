@@ -1,10 +1,12 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const etsy=require('./etsy');
 const root = path.join(__dirname, 'public');
 const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
 const server = http.createServer((req,res)=>{
   const pathname = new URL(req.url, 'http://localhost').pathname;
+  if(pathname.startsWith('/api/etsy/')||pathname==='/oauth/callback'){const u=new URL(req.url,'http://localhost');void etsy.handle(req,res,u);return;}
   const file = {'/':'index.html','/app.js':'app.js','/style.css':'style.css','/score.js':'score.js'}[pathname];
   if (!file) {res.writeHead(404);return res.end('Bulunamadı');}
   fs.readFile(path.join(root,file),(error,data)=>{
@@ -17,6 +19,7 @@ server.on('error',error=>{
   process.exitCode=1;
 });
 server.listen(Number(process.env.PORT || 3000),process.env.HOST || '0.0.0.0',()=>{
+  etsy.start();
   console.log('STL Niş Atölyesi hazır; port '+(process.env.PORT||3000));
   if(process.platform==='win32'&&process.env.OPEN_BROWSER==='1'){
     const {execFile}=require('node:child_process');

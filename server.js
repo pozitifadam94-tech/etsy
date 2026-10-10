@@ -23,6 +23,6 @@ server.listen(Number(process.env.PORT || 3000),process.env.HOST || '0.0.0.0',()=
   console.log('STL Niş Atölyesi hazır; port '+(process.env.PORT||3000));
   if(process.platform==='win32'&&process.env.OPEN_BROWSER==='1'){
     const {execFile}=require('node:child_process');
-    execFile('rundll32.exe',['url.dll,FileProtocolHandler','http://127.0.0.1:'+server.address().port+'/'],error=>{if(error)console.log('Tarayicida http://127.0.0.1:'+server.address().port+'/ adresini ac.');});
+    execFile('rundll32.exe',['url.dll,FileProtocolHandler','http://localhost:'+server.address().port+'/'],error=>{if(error)console.log('Tarayicida http://localhost:'+server.address().port+'/ adresini ac.');});
   }
 });

@@ -5,7 +5,7 @@
 3. Cikartilan klasordeki `windows-start.cmd` dosyasina cift tikla. Panel sunucu hazir olduktan sonra varsayilan tarayicida acilir.
 4. Siyah pencereyi kullanim boyunca acik tut. Kapatmak sunucuyu durdurur. Bilgisayar kapaliyken otomasyon calismaz.
 
-Windows komut dosyasi yalnizca kendi bilgisayarindan erisilebilen 127.0.0.1 adresini kullanir. Etsy API baglantisi henuz yoktur; bu yerel panel baslaticisidir. Anahtar, secret veya token dosyalara/GitHub'a eklenmemelidir.
+Windows komut dosyasi yalnizca kendi bilgisayarindan erisilebilen localhost adresini kullanir. Etsy API baglantisi icin asagidaki Canli Etsy baglantisi adimlarini tamamla. Anahtar, secret veya token dosyalara/GitHub'a eklenmemelidir.
 
 ## Mevcut verilerini tasi
 
@@ -24,7 +24,7 @@ Bir sonraki asama: Etsy'nin destekledigi API kapsamlarini ve OAuth callback gere
 
 1. Eski paneldeki arastirma verilerini JSON olarak yedekle. Siyah pencereyi kapat.
 2. Guncel proje ZIP'ini ayri klasore cikart, windows-start.cmd ile ac.
-3. Etsy uygulama ayarlarinda Redirect/Callback URI olarak `http://127.0.0.1:3000/oauth/callback` kaydetmeyi dene. Etsy HTTP/loopback adresini kabul etmezse baglanti tamamlanamaz; HTTPS callback alternatifi arastirilmalidir. Anahtarlari paylasmadan hata metnini bildir.
+3. Etsy uygulama ayarlarinda Redirect/Callback URI olarak `http://localhost:3000/oauth/callback` kaydet. Bu localhost adresinin kabul edildigi kullanici tarafindan dogrulandi.
 4. Yerel panelde Canli magaza takibi > Ilk baglanti bolumunde Keystring ve Shared secret degerlerini gir. Bunlari sohbete veya GitHub'a gonderme.
 5. Yerel baglantiyi kaydet > Etsy hesabimi bagla. Acilan Etsy ekraninda kendi magazana salt okunur erisim ver.
 6. Etsy donusunden sonra son basarili kayit ve magaza adi gorunmeli. Yeni aktif ilanlar ilk baslatmada ve 30 dakikada bir yenilenir; Simdi guncelle de kullanilabilir.
@@ -35,4 +35,8 @@ Takip aktif ilanlari, son 90 gunun odenmis ve iptal edilmemis siparis satirlarin
 
 Goruntulenme ve donusum olcumu bu API baglantisinda yoktur. Bu nedenle canli bolum yeterli veri olmadan tut/kaldir puani vermez. Sifir satis otomatik kaldirma nedeni degildir. Manuel deney karnesi ayri kalir. Bir guncelleme basarisizsa eski basarili ozet korunur ve hata gorunur. Ilan gorunum tarihinden cok once acilmissa tum omur satislari alinmaz; yalnizca son 90 gun gosterilir.
 
-OAuth ve gercek magaza baglantisi gelistirme ortaminda Etsy ag erisimi olmadigi icin dogrulanamadi. Ilk Windows baglantisi bu dogrulamanin zorunlu adimidir. Yalnizca yerel 127.0.0.1 paneli API'yi kullanabilir; GitHub Pages salt statik arastirma panelidir.
+OAuth ve gercek magaza baglantisi gelistirme ortaminda Etsy ag erisimi olmadigi icin dogrulanamadi. Ilk Windows baglantisi bu dogrulamanin zorunlu adimidir. Yalnizca yerel localhost paneli API'yi kullanabilir; GitHub Pages salt statik arastirma panelidir.
+
+## Localhost surumune gecis
+
+Once eski 127.0.0.1 panelinden Yedek indir. Yeni surum localhost adresini acar; farkli adres nedeniyle tarayici arastirma kayitlarini burada yeniden Yedek yukle ile aktar. Anahtarlari ilk defa gireceksen localhost panelini kullan. Daha once 127.0.0.1 callback ile anahtar kaydettiysen yeni formda yeniden kaydet ve Etsy yetkilendirmesini tekrarla. Gercek token alimi ve ilk senkronizasyon henuz dogrulanmadi.

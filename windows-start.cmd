@@ -14,7 +14,7 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-set "HOST=127.0.0.1"
+set "HOST=localhost"
 set "PORT=3000"
 set "OPEN_BROWSER=1"
 echo Panel baslatiliyor. Tarayici otomatik acilacak.

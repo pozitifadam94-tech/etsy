@@ -40,3 +40,11 @@ Niş arama, veri yeterliliği filtresi, puan/fiyat sıralama, yan yana karşıla
 Satış denemelerinde ürün başına ilk 30/60/90 günün birikimli sonuçları ayrı tutulur; aynı dönem yeniden kaydedilirse güncellenir. Dönüşüm sipariş/görüntülenme olarak hesaplanır; sıfır görüntülenmede gösterilmez. Net tutar yalnızca gider girildiyse gelir eksi giderdir. Dönemleri toplama. Ürün veya niş silindiğinde bağlı sonuçlar silinir; son silmeyi geri al tüm bağlı kayıtları geri getirir. Eski JSON yedekleri desteklenir.
 
 Araştırma görevleri eksik örnekleri, eksik sonuç sayısını, 30 günden eski gözlemleri ve tek mağaza ağırlığını gösterir. Görevler puanın yerine geçmez. Canlı API, kullanıcı girişi ve cihazlar arası otomatik senkronizasyon henüz yoktur.
+
+## Ürün karnesi ve ücretsiz mesaj yardımcısı
+
+Ürün karnesi en uzun tamamlanmış deneme dönemini kullanır. 100 görüntülenmeden az veri için puan verilmez. En az 3 sipariş ve %2 dönüşümde "Devam et"; ilk 90 günde 300 görüntülenme ve sıfır siparişte "Duraklatmayı değerlendir" gösterilir. Negatif net gelir maliyet incelemesi gerektirir. Bunlar başlangıç eşikleridir, Etsy ölçütleri veya istatistiksel güven garantisi değildir. Hiçbir ilan otomatik kaldırılmaz. Puan %3 dönüşümde 100 olacak şekilde ölçeklenir. Eski veya tutarsız gözlemlerde puan gösterilmez.
+
+Mesaj yardımcısı ücretsiz sabit İngilizce/Türkçe şablonlar ve mevcut ChatGPT kullanımına aktarılabilecek profil+mesaj metni sağlar. Otomatik çeviri, AI API veya Etsy mesaj erişimi yoktur. İngilizce metin düzenlenirse Türkçe açıklama otomatik güncellenmez. Müşteri mesajı sunucuya gönderilmez veya uygulama yedeğine kaydedilmez.
+
+Etsy uygulamasının onaylandığı kullanıcı tarafından bildirildi; API bağlantısı henüz yapılmadı. GitHub Pages güvenli sunucu veya gizli anahtar deposu değildir. Keystring/Shared secret/OAuth token kaynak koduna, tarayıcıya veya GitHub'a eklenmemelidir. Kendi mağaza verilerine erişim için uygun OAuth izinleri ve kayıtlı callback gerekir. API'nin Etsy Stats görüntülenmelerini veya mesajlarını sağladığı varsayılmamalıdır; desteklenmeyen ölçümler manuel girilir. Ücretsiz kişisel sunucu seçeneği bilgisayar açıkken çalışabilir; sürekli ücretsiz barındırma garanti edilmez.

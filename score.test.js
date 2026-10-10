@@ -5,3 +5,10 @@ test('Eksik veriden fırsat puanı üretilmez',()=>{assert.equal(evaluate({id:'n
 test('Fiyat medyanı ve mağaza tekilleştirme doğru',()=>{const rows=[1,2,3,4].map((price,i)=>({niche:'n',price,shop:i%2?' Shop ':'shop',reviews:0}));const result=evaluate({id:'n',competition:10},rows);assert.equal(result.median,2.5);assert.equal(result.sellers,1);assert.equal(result.score,null);});
 test('Aynı talepte daha düşük rekabet daha yüksek puan alır',()=>{const rows=[1,2,3].map(i=>({niche:'n',price:5,shop:'shop'+i,reviews:10}));assert.ok(evaluate({id:'n',competition:20},rows).score>evaluate({id:'n',competition:2000},rows).score);});
 test('Bilinmeyen yorum sıfır olarak sayılmaz',()=>{const rows=[1,2,3].map(i=>({niche:'n',price:5,shop:'shop'+i,reviews:null}));assert.equal(evaluate({id:'n',competition:20},rows).score,null);});
+const {performance}=require('./public/score.js');
+const record=(extra={})=>({period:90,views:300,orders:0,revenue:0,cost:null,date:new Date().toISOString().slice(0,10),...extra});
+test('Az görünürlükte kaldırma puanı yok',()=>assert.equal(performance([record({views:10})]).score,null));
+test('Sıfır satış ve yeterli 90 gün örneğinde duraklatmayı değerlendir',()=>assert.equal(performance([record()]).label,'Duraklatmayı değerlendir'));
+test('Birikimli dönemler toplanmaz, son fark hesaplanır',()=>{const r=performance([record({period:30,views:100,orders:2,revenue:10}),record({views:300,orders:6,revenue:30})]);assert.equal(r.views,300);assert.equal(r.increment.orders,4);assert.equal(r.label,'Devam et');});
+test('Tutarsız dönem ve eski gözlem öneri üretmez',()=>{assert.equal(performance([record({period:30,views:400}),record()]).score,null);assert.equal(performance([record({date:'2020-01-01'})]).label,'Veriyi güncelle');});
+test('Zarar satış başarısından önce değerlendirilir',()=>assert.equal(performance([record({orders:9,revenue:20,cost:30})]).label,'Maliyetleri incele'));

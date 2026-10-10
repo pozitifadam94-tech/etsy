@@ -15,7 +15,36 @@ async function pages(route){const all=[];for(let offset=0;offset<100000;offset+=
 function summarize(listings,receipts,now=Date.now()){
  return listings.map(l=>{const created=l.original_creation_timestamp||l.creation_timestamp;const age=created?Math.max(0,Math.floor((now-created*1000)/86400000)):null;const periods=[30,60,90].map(days=>{const start=Math.max((created||0)*1000,now-days*86400000);const sales=receipts.filter(r=>r.is_paid&&!r.is_canceled&&(r.create_timestamp||r.creation_timestamp)*1000>=start).flatMap(r=>r.transactions||[]).filter(t=>t.listing_id===l.listing_id);const currencies=new Set(sales.map(t=>t.price?.currency_code).filter(Boolean));return {days,orders:sales.length,quantity:sales.reduce((s,t)=>s+(t.quantity||0),0),revenue:currencies.size<=1?sales.reduce((s,t)=>s+(t.price?.amount||0)/(t.price?.divisor||100)*(t.quantity||0),0):null,currency:currencies.size===1?[...currencies][0]:null};});return {id:l.listing_id,title:l.title,url:l.url||'https://www.etsy.com/listing/'+l.listing_id,state:l.state,created,age,price:l.price,image:l.images?.[0]?.url_570xN||l.images?.[0]?.url_fullxfull||null,periods,favorites:l.num_favorers??null};});
 }
-async function sync(){if(busy)return;busy=true;try{if(!data.shopId){const user=data.tokens.access_token.split('.')[0];if(!/^\d+$/.test(user))throw Error('Etsy kullanici kimligi dogrulanamadi.');const shop=await api('/users/'+user+'/shops');const id=shop.shop_id||shop.results?.[0]?.shop_id;if(!id)throw Error('Bu hesaba ait magaza bulunamadi.');persist({...data,shopId:id,shopName:shop.shop_name||shop.results?.[0]?.shop_name});}const listings=await pages('/shops/'+data.shopId+'/listings/active?includes=Images');const receipts=await pages('/shops/'+data.shopId+'/receipts?min_created='+Math.floor((Date.now()-90*86400000)/1000));for(const r of receipts){r.transactions=await pages('/shops/'+data.shopId+'/receipts/'+r.receipt_id+'/transactions');}const snapshot={updated:new Date().toISOString(),listingCount:listings.length,receiptCount:receipts.length,transactionCount:receipts.reduce((s,r)=>s+(r.transactions?.length||0),0),products:summarize(listings,receipts)};persist({...data,snapshot,error:null});}catch(e){persist({...data,error:e.message});}finally{busy=false;}}
+async function loadActive(shopId,requestPages=pages,request=api){
+ const diagnostics=[];
+ let listings;
+ try{listings=await requestPages('/shops/'+shopId+'/listings?state=active&includes=Images');diagnostics.push({source:'Magaza ilanlari / active',count:listings.length});}
+ catch(e){diagnostics.push({source:'Magaza ilanlari / active',error:e.message});}
+ if(!listings?.length){
+  try{const fallback=await requestPages('/shops/'+shopId+'/listings/active?includes=Images');diagnostics.push({source:'Aktif ilanlar',count:fallback.length});listings=fallback;}
+  catch(e){diagnostics.push({source:'Aktif ilanlar',error:e.message});}
+ }
+ if(!listings)throw Error('Urun listesi alinamadi: '+diagnostics.map(d=>d.error).filter(Boolean).join(' / '));
+ if(!listings.length){const shop=await request('/shops/'+shopId);const count=shop.listing_active_count??shop.results?.[0]?.listing_active_count;diagnostics.push({source:'Magaza aktif ilan sayisi',count:count??null});if(Number(count)>0)throw Error('Etsy magazada '+count+' aktif ilan bildiriyor ancak ilan listesi bos geldi. Bos yanit basarili sayilmadi.');}
+ return {listings,diagnostics};
+}
+async function sync(){
+ if(busy)return;busy=true;let stage='Magaza';
+ try{
+  const user=data.tokens?.access_token.split('.')[0];if(!/^\d+$/.test(user||''))throw Error('Etsy kullanici kimligi dogrulanamadi.');
+  const shop=await api('/users/'+user+'/shops');const id=shop.shop_id||shop.results?.[0]?.shop_id;
+  if(!id)throw Error('Bu hesaba ait magaza bulunamadi.');
+  persist({...data,shopId:id,shopName:shop.shop_name||shop.results?.[0]?.shop_name});
+  stage='Urunler';const {listings,diagnostics}=await loadActive(id);
+  const updated=new Date().toISOString();
+  // Product visibility must not depend on whether sales access succeeds.
+  const products=summarize(listings,[]).map(p=>({...p,periods:[],salesAvailable:false}));
+  persist({...data,snapshot:{updated,listingCount:listings.length,products,diagnostics,salesUpdated:null},error:null});
+  stage='Satislar';const receipts=await pages('/shops/'+id+'/receipts?min_created='+Math.floor((Date.now()-90*86400000)/1000));
+  for(const r of receipts)r.transactions=await pages('/shops/'+id+'/receipts/'+r.receipt_id+'/transactions');
+  persist({...data,snapshot:{updated,listingCount:listings.length,receiptCount:receipts.length,transactionCount:receipts.reduce((s,r)=>s+(r.transactions?.length||0),0),products:summarize(listings,receipts).map(p=>({...p,salesAvailable:true})),diagnostics,salesUpdated:new Date().toISOString()},error:null});
+ }catch(e){persist({...data,error:stage+': '+e.message});}finally{busy=false;}
+}
 function status(){return {configured:!!data.key,connected:!!data.tokens,shop:data.shopName||null,busy,error:data.error||null,snapshot:data.snapshot||null};}
 async function handle(req,res,url){const respond=(code,value)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
  if(!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress)){respond(403,{error:'Yalnizca yerel bilgisayardan erisim.'});return;}
@@ -32,4 +61,4 @@ async function handle(req,res,url){const respond=(code,value)=>{res.writeHead(co
  }catch(e){respond(400,{error:e.message});}
 }
 function start(){if(data.tokens)void sync();const timer=setInterval(()=>{if(data.tokens)void sync();},30*60000);timer.unref();}
-module.exports={handle,start,summarize};
+module.exports={handle,start,summarize,loadActive};

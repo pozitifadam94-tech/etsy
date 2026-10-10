@@ -107,5 +107,24 @@ function financeSummary(products,ledger,from,to){
  for(const row of ledger){if(row.date<from||row.date>to)continue;get(row.currency)[row.kind]+=row.amount;}
  return {unknown,rows:[...totals.values()].map(t=>({...t,balance:t.automatic+t.income-t.expense-t.refund})).sort((a,b)=>a.currency.localeCompare(b.currency))};
 }
-if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary,supportSummary,changeAssessment,listingChecks,financeSummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;root.supportSummary=supportSummary;root.changeAssessment=changeAssessment;root.listingChecks=listingChecks;root.financeSummary=financeSummary;}
+function sharingComparison(product,share,updated,now=Date.now()){
+ if(share.status!=='shared')return {label:'Paylaşım planlandı',reason:'Paylaştığında durumu Paylaşıldı olarak değiştir. Platforma otomatik gönderim yapılmaz.'};
+ const stamp=Date.parse(updated),day=86400000,at=Date.parse(share.date+'T00:00:00Z');
+ if(!product||product.salesAvailable===false||!Number.isFinite(stamp)||now-stamp>2*day)return {label:'Satış verisi gerekiyor',reason:'Güncel aktif ürün verisiyle senkronize et. Trafik verisi ayrıca manuel girilir.'};
+ if(!product.daily)return {label:'Günlük veri bekleniyor',reason:'Günlük satış verisi henüz alınmadı.'};
+ const reference=Math.min(now,stamp);
+ if(reference<at+7*day)return {label:'İlk 7 gün tamamlanmadı',reason:'Paylaşım sonrası 7 tam UTC gününün satış verisi bekleniyor.'};
+ if(at-7*day<reference-90*day)return {label:'Geçmiş veri kapsamı dışında',reason:'Önceki dönem 90 günlük API kapsamına sığmıyor.'};
+ if(!product.created||product.created*1000>at-7*day)return {label:'Önceki dönem yetersiz',reason:'Ürün paylaşım öncesindeki 7 tam gün boyunca yayında değildi.'};
+ const count=(from,to)=>Object.entries(product.daily).reduce((sum,[date,qty])=>{const t=Date.parse(date+'T00:00:00Z');return sum+(t>=from&&t<to?Number(qty):0);},0);
+ return {label:'Satış dönemleri hazır',before:count(at-7*day,at),after:count(at,at+7*day),reason:'Paylaşım öncesi/sonrası 7 tam UTC günündeki toplam adetler. Satışların bu paylaşımdan geldiği veya paylaşımın satışa neden olduğu bilinmiyor.'};
+}
+function marketPriceSummary(listings){
+ const digital=listings.filter(l=>l.type==='download'),unknownType=listings.filter(l=>!l.type).length;
+ const currencies={};for(const l of digital){if(l.price===null||!Number.isFinite(l.price)||!l.currency)continue;(currencies[l.currency]??=[]).push(l.price);}
+ const medians=Object.entries(currencies).map(([currency,values])=>{values.sort((a,b)=>a-b);return {currency,count:values.length,median:(values[Math.floor((values.length-1)/2)]+values[Math.floor(values.length/2)])/2};});
+ const reason=!listings.length?'Etsy bu gözlemde ilan döndürmedi.':!digital.length?(unknownType?'İlanlar alındı, fakat '+unknownType+' ilanın türü bilinmiyor ve dijital türünde doğrulanmış ilan yok. Fiyat medyanı hesaplanmadı.':'İlanlar alındı; örneklemde dijital indirme türünde ilan yok. Dijital fiyat medyanı hesaplanmadı.'):'Dijital ilanlar alındı, ancak geçerli fiyat ve para birimi bulunamadı. Fiyat medyanı hesaplanmadı.';
+ return {digital:digital.length,unknownType,medians,reason};
+}
+if(typeof module!=='undefined')module.exports={evaluate,performance,salesTrend,changeComparison,weeklySummary,familySummary,supportSummary,changeAssessment,listingChecks,financeSummary,sharingComparison,marketPriceSummary};else {root.evaluate=evaluate;root.performance=performance;root.salesTrend=salesTrend;root.changeComparison=changeComparison;root.weeklySummary=weeklySummary;root.familySummary=familySummary;root.supportSummary=supportSummary;root.changeAssessment=changeAssessment;root.listingChecks=listingChecks;root.financeSummary=financeSummary;root.sharingComparison=sharingComparison;root.marketPriceSummary=marketPriceSummary;}
 })(globalThis);

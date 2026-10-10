@@ -84,3 +84,9 @@ Değişiklik sonuçları bölümünde ve ürün detayındaki günlükte önceki/
 En az 3 diğer uygun ürün, hedefte başlangıç satışı ve toplam 3 adet, diğer ürünlerde her dönemde toplam en az 5 adet aranır. Bu eşikler istatistiksel güven garantisi değildir. Hedefte aynı pencere içinde başka değişiklik varsa ayrı etki yorumu yapılmaz. Ürün ve diğer ürünler için ayrı yüzde değişimi, ardından yüzde puan farkı gösterilir. ±5 yüzde puan benzer hareket etiketi için başlangıç eşiğidir; A/B test sonucu sayılmaz. Güncel snapshot değerlendirme sonrası 14 tam gününü kapsamalıdır. Eski veya eksik veri değerlendirmeyi engeller.
 
 Bu bölüm mevcut değişiklik kayıtlarını kullanır; tekrar girmek gerekmez. Hiçbir Etsy ilanı değiştirilmez. Yeni sürümde satışları bir kez güncelle, ardından Değişiklik sonuçları bölümünü aç.
+
+## Yeni ürün kontrolü
+
+API snapshot'ında başlık, açıklama, etiketler, görsel sayısı/kimlikleri ve ilan türü saklanır. Ürün kontrolü ekranı ilk 30 günlük veya tüm aktif ilanları gösterebilir. Veri alınmadı, doğrulanmış boş bilgi ve inceleme önerisi ayrı işaretlenir. STL/dijital teslim kelimelerinin bulunması temel bir metin kontrolüdür; anlamsal doğruluk, SEO performansı veya dosya sağlamlığı doğrulanmaz. Etiket sayısı 13'ten azsa ilgili yeni ifadeleri değerlendirme önerisidir; tüm alanların doldurulması zorunlu sayılmaz.
+
+İçeriği inceledim işareti tarayıcıda saklanır ve JSON yedeğine dahildir. API bilgisi eksikken işaret konmaz. Başlık/açıklama/etiket/görsel/tür bilgileri değiştiğinde içerik yeniden incelemeye açılır. Eski snapshot'ta yeni alanlar yoksa Şimdi güncelle yap. Yeni ürünlerin ilk listede görünmesi için ilk başarılı senkronizasyon yeterlidir; Etsy ilanları hiçbir şekilde değiştirilmez. Kontrol listesi gerçek müşteri talebi, satış veya kârlılık puanı değildir.

@@ -13,3 +13,14 @@ test('Mağazada aktif ilan varken boş yanıt başarılı sayılmaz',async()=>{a
 const {bundleAnalysis}=require('./etsy');
 test('Paket çiftleri aynı siparişte tekrar sayılmaz; iptal/ödenmemiş siparişler dışarıda',()=>{const listings=[{listing_id:1},{listing_id:2}];const receipt={is_paid:true,transactions:[{listing_id:1,quantity:1},{listing_id:1,quantity:1},{listing_id:2,quantity:3}]};const r=bundleAnalysis(listings,[receipt,{...receipt,is_paid:false},{...receipt,is_canceled:true}]);assert.equal(r.baskets,1);assert.equal(r.pairs[0].count,1);assert.equal(r.pairs[0].label,'Veri yetersiz');});
 test('Üç farklı ortak sipariş adaydır; aktif olmayan ürünler paket önerisine girmez',()=>{const receipt={is_paid:true,transactions:[{listing_id:1,quantity:1},{listing_id:2,quantity:1},{listing_id:3,quantity:1}]};const r=bundleAnalysis([{listing_id:1},{listing_id:2}],[receipt,receipt,receipt]);assert.equal(r.pairs.length,1);assert.equal(r.pairs[0].count,3);assert.equal(r.pairs[0].label,'Paket araştırmasına aday');});
+test('Benzersiz sipariş, işlem satırı ve adet ayrıdır; yinelenen kimlikler tekrar sayılmaz',()=>{
+ const rows=[{receipt_id:11,is_paid:true,create_timestamp:stamp,transactions:[{...transaction,transaction_id:21},{...transaction,transaction_id:22,quantity:3}]},{receipt_id:11,is_paid:true,create_timestamp:stamp,transactions:[{...transaction,transaction_id:21},{...transaction,transaction_id:21},{...transaction,transaction_id:22,quantity:3}]}];
+ const r=summarize([listing],rows,now)[0];assert.equal(r.periods[0].orders,1);assert.equal(r.periods[0].transactionLines,2);assert.equal(r.periods[0].quantity,5);assert.equal(r.periods[0].revenueKind,'grossItemValue');
+});
+test('Sonradan iptal olan yinelenmiş siparişin en son kaydı satıştan çıkarılır',()=>{
+ const old={receipt_id:11,is_paid:true,create_timestamp:stamp,transactions:[transaction]};assert.equal(summarize([listing],[old,{...old,is_canceled:true}],now)[0].periods[0].quantity,0);
+});
+test('Eksik fiyat bedeli sıfırmış gibi gösterilmez; Retry-After saniye ve tarih biçimi tanınır',()=>{
+ const r=summarize([listing],[{is_paid:true,create_timestamp:stamp,transactions:[{...transaction,price:null}]}],now)[0];assert.equal(r.periods[0].revenue,null);assert.equal(r.moneyComplete,false);
+ const {retryAfterMillis}=require('./etsy');assert.equal(retryAfterMillis('3',0),3000);assert.equal(retryAfterMillis('Thu, 01 Jan 1970 00:01:00 GMT',0),60000);assert.equal(retryAfterMillis('invalid',0),60000);
+});

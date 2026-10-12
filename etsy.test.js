@@ -1,6 +1,15 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {summarize}=require('./etsy');
+test('Etsy sırasız görsellerinden yalnız açık rank=1 kimliği seçilir; Drive kaynağı veya eksik sıra diğer görsele düşmez',()=>{
+ const one={listing_image_id:101,rank:1,url_fullxfull:'https://i.etsystatic.com/1/il_fullxfull.jpg',url_570xN:'https://i.etsystatic.com/1/il_570xN.jpg'},two={listing_image_id:102,rank:2,url_fullxfull:'https://i.etsystatic.com/2/il_fullxfull.jpg'};
+ const result=summarize([{listing_id:11,title:'STL file',state:'active',type:'download',images:[two,one]}],[])[0];
+ assert.equal(result.primaryImage.imageId,'101');assert.equal(result.primaryImage.url,one.url_fullxfull);assert.equal(result.image,one.url_570xN);assert.equal(result.images[0].rank,2);
+ assert.equal(result.primaryImage.orderingVerification,'historical-rule-current-unverified');
+ assert.equal(summarize([{listing_id:11,images:[two]}],[])[0].image,null);
+ const bad=summarize([{listing_id:11,images:[{...one,url_fullxfull:'https://drive.google.com/drive/folders/private',url_570xN:null},two]}],[])[0];
+ assert.equal(bad.image,null);assert.equal(JSON.stringify(bad.images).includes('drive.google.com'),false);
+});
 const now=Date.now(),stamp=Math.floor(now/1000);
 const listing={listing_id:1,title:'Model',creation_timestamp:stamp-86400*40};
 const transaction={listing_id:1,quantity:2,price:{amount:500,divisor:100,currency_code:'USD'}};

@@ -7,12 +7,12 @@ const crypto = require('node:crypto');
 const {spawn, execFileSync} = require('node:child_process');
 
 const REQUIRED_FILES = [
-  'server.js', 'etsy.js', 'workspace.js', 'history.js', 'observations.js',
+  'server.js', 'etsy.js', 'pinterest.js', 'pinterest-client.js', 'pinterest-store.js', 'pinterest-media.js', 'workspace.js', 'history.js', 'observations.js',
   'market.js', 'updates.js', 'workspace-api.js', 'package.json', 'README.md',
   'WINDOWS.md', 'RUN_LATEST.md', 'UPGRADE_STATUS.md', 'NEXT_STEPS.md',
   'windows-start.cmd', 'windows-shortcut.cmd', 'scripts/launch.js'
 ];
-const OPTIONAL_FILES = ['drive-check.js', 'ROADMAP.md', 'REVIEW.md', 'RESEARCH_SOURCES.md'];
+const OPTIONAL_FILES = ['drive-check.js', 'ROADMAP.md', 'REVIEW.md', 'RESEARCH_SOURCES.md', 'PINTEREST_SOURCES.md'];
 const ASSET_EXTENSIONS = new Set(['.html', '.js', '.css', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.ico', '.woff', '.woff2']);
 const MAX_BYTES = 25 * 1024 * 1024;
 const MAX_FILES = 500;

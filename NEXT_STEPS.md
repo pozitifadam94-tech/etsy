@@ -1,4 +1,24 @@
-# Sonraki geliştirmeler — 1.7.0
+# Sonraki doğrulamalar — 1.8.0
+
+Pinterest akışı ve ilk kullanım [RUN_LATEST.md](RUN_LATEST.md), yerel test/paket/yayımın son sonucu [UPGRADE_STATUS.md](UPGRADE_STATUS.md) içindedir. Alttaki 1.7.0 araştırma ve önceki veri işleri tarihsel devam listesi olarak korunur; canlı Pinterest bağlantısını beklemek kuyruk/önizleme/tekrar önleme geliştirmesini durdurmaz.
+
+## Kullanıcının ilk bağlantısında doğrulanacaklar
+
+1. [Pinterest uygulama panelinde](https://developers.pinterest.com/apps/) uygulama kaydı, gereken hesap türü/işletme hesabı, OAuth dönüş adresinin kabulü ve Standard/canlı onay kontrol edilmeli. Güncel web belgeleri `CONNECT 403` aldığı için bunlar bu oturumda tam doğrulanmadı. Kayıtlı localhost kabul edilmezse kullanıcıya ait kayıtlı HTTPS adresi + elle tam dönüş URL'si yolu vardır; ücretli tünel gerekmez. App secret/tokenlar sohbet veya test dosyasında istenmez.
+2. Gerçek OAuth hesabı, sayısal hesap kimliği, beş gerekli kapsam ve mevcut panonun gizliliği yerel panelde kontrol edilmeli. API sayısal kimlik vermezse gerçek gönderim engelli kalır. Standard onayı yalnız hesaba bağlı **kullanıcı beyanı; API üzerinden doğrulanmadı** etiketiyle kaydedilir; OAuth veya açık pano onay kanıtı sayılmaz.
+3. Güncel Etsy görsel sıralama sözleşmesi erişilebilir resmî belgede yeniden doğrulanmalı. Şimdiki tam `rank === 1` seçimi 2021 resmî şemasına dayanır; güncel kesin ilk görsel iddiası yoktur. Gerçek mağazanın güncel rank-1 kaydı ve önizlemesi kullanıcı tarafından kontrol edilmeli; eksik/belirsiz görselde başka görsele geçilmemeli. Kaynak kaydı [PINTEREST_SOURCES.md](PINTEREST_SOURCES.md) içindedir.
+4. Kullanıcı hazır grubu görüp günlük düğmeye bastığında ilk gerçek pinin doğru görsel/Etsy hedefi/pano ve görünürlüğü kontrol edilmeli. Canlı OAuth, token yenileme ve pin kabulü bu geliştirme oturumunda denenmedi. Trial/Sandbox/dry-run gerçek herkese açık başarı sayılmaz; dry-run hiçbir pin oluşturma isteği yapmaz.
+5. Kullanıcının Windows bilgisayarında eski kayıtlarla ZIP güncellemesi, kuyruk yeniden açılışı ve ayrı **Pinterest geçmişini indir** dışa aktarımı kontrol edilmeli. Olağan workspace yedeği Pinterest kuyruğunu içermez; `%LOCALAPPDATA%\STLNicheLab` ve `pinterest-sharing.json.backup` korunmalı. Gizli `pinterest-connection.json` paylaşılmamalı. Yerel bağlantıyı kaldırma dışında Pinterest hesap ayarından yetki kaldırma da kullanıcı tarafından yapılır.
+
+Belirsiz pin sonucunda kapasite tutulur ve otomatik ikinci POST yapılmaz; olası okuma eşleşmesi tek başına kesin kanıt değildir. Kullanıcı sonucu açıkça çözmeden yeniden gönderim olmaz. Her koşulda tam bir kez yayın veya üç paylaşımın Pinterest açısından güvenli hacim olduğu iddia edilmez. Günlük limit **Europe/Istanbul** için yerel politikadır; aşağıdaki eski **UTC satış takvimi** işi bundan ayrıdır.
+
+## Bu sürümün dışında kalanlar
+
+Tam otomatik günlük zamanlama, kendiliğinden yeniden paylaşım, yeni pano oluşturma ve bütün eski manuel pinlerin kesin içe alınması bu sürümün kapsamına eklenmedi. Ücretli servis, n8n, tarayıcı botu veya parola/çerez yöntemi gerekmez. İlk gerçek paylaşımın kısa yolu: bağlantı ve mevcut pano → onay beyanı → güncel grubu önizle → günlük düğme.
+
+---
+
+# Tarihsel devam listesi — 1.7.0
 
 1.7.0’ın çalışan kapsamı ve son doğrulama [UPGRADE_STATUS.md](UPGRADE_STATUS.md), ilk araştırma/açılış [RUN_LATEST.md](RUN_LATEST.md) içindedir. Önceki 1.6.0 kayıtları tarihsel olarak korunur. Gerçek müşteri teslimi **Etsy TXT → Google Drive klasörü → STL**; gerçek klasör bağlantısı ilan/araştırma metnine eklenmez. Uygulama güncelleme ZIP’i, STL teslim yöntemi değildir.
 

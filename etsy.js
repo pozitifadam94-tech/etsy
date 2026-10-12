@@ -41,6 +41,16 @@ async function access(ctx=context()){
 async function api(route,ctx=context()){const token=await access(ctx);return jsonFetch('https://openapi.etsy.com/v3/application'+route,{headers:{'x-api-key':ctx.key+':'+ctx.secret,Authorization:'Bearer '+token}},ctx);}
 async function pages(route,ctx=context()){const all=[];for(let offset=0;offset<100000;offset+=100){const r=await api(route+(route.includes('?')?'&':'?')+'limit=100&offset='+offset,ctx);if(!Array.isArray(r.results))throw Error('Beklenmeyen Etsy yanıtı.');all.push(...r.results);if(r.results.length<100||(Number.isFinite(r.count)&&all.length>=r.count))return all;}throw Error('Etsy sayfalama sınırı aşıldı; eksik veri kaydedilmedi.');}
 function receiptRows(receipts){return [...new Map(receipts.map((r,index)=>[r.receipt_id===undefined?'row:'+index:String(r.receipt_id),r])).values()].map(r=>({...r,transactions:[...new Map((r.transactions||[]).map((t,index)=>[t.transaction_id===undefined?'row:'+index:String(t.transaction_id),t])).values()]}));}
+function listingImages(value){
+ const safeURL=value=>{try{const u=new URL(value);if(u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&(u.hostname==='etsystatic.com'||u.hostname.endsWith('.etsystatic.com')))return u.href;}catch{}return null;};
+ return (Array.isArray(value)?value:[]).slice(0,50).map(image=>({
+  listing_image_id:/^\d+$/.test(String(image?.listing_image_id||''))?String(image.listing_image_id):null,
+  rank:Number.isInteger(image?.rank)&&image.rank>0?image.rank:null,
+  url_fullxfull:safeURL(image?.url_fullxfull),url_570xN:safeURL(image?.url_570xN),
+  full_width:Number.isInteger(image?.full_width)&&image.full_width>0?image.full_width:null,
+  full_height:Number.isInteger(image?.full_height)&&image.full_height>0?image.full_height:null
+ }));
+}
 function summarize(listings,receipts,now=Date.now()){
  const rows=receiptRows(receipts);
  return listings.map(l=>{
@@ -55,7 +65,8 @@ function summarize(listings,receipts,now=Date.now()){
   for(const r of eligible){if(r.stamp>now||!r.transactions.length)continue;const day=new Date(r.stamp).toISOString().slice(0,10);dailyOrders[day]=(dailyOrders[day]||0)+1;dailyLines[day]=(dailyLines[day]||0)+r.transactions.length;
    for(const t of r.transactions){daily[day]=(daily[day]||0)+(Number(t.quantity)||0);const price=t.price;if(!price||!Number.isFinite(price.amount)||!Number.isFinite(price.divisor)||price.divisor<=0||!price.currency_code){moneyComplete=false;continue;}dailyMoney[day]??={};dailyMoney[day][price.currency_code]=(dailyMoney[day][price.currency_code]||0)+price.amount/price.divisor*(Number(t.quantity)||0);}
   }
-  return {dailyMoney,dailyOrders,dailyLines,moneyComplete,coverageBasis:'UTC',description:typeof l.description==='string'?l.description:null,tags:Array.isArray(l.tags)?l.tags:null,imageCount:Array.isArray(l.images)?l.images.length:null,imageIds:Array.isArray(l.images)?l.images.map(i=>String(i.listing_image_id||i.url_fullxfull||i.url_570xN||'')):null,listingType:typeof l.type==='string'?l.type:null,daily,id:l.listing_id,title:l.title,url:l.url||'https://www.etsy.com/listing/'+l.listing_id,state:l.state,created,age,price:l.price,image:l.images?.[0]?.url_570xN||l.images?.[0]?.url_fullxfull||null,periods,favorites:l.num_favorers??null};
+  const images=listingImages(l.images),primaryImage=require('./public/pinterest-model').selectPrimaryImage(images),primary=images.find(image=>image.listing_image_id===primaryImage.imageId);
+  return {dailyMoney,dailyOrders,dailyLines,moneyComplete,coverageBasis:'UTC',description:typeof l.description==='string'?l.description:null,tags:Array.isArray(l.tags)?l.tags:null,imageCount:Array.isArray(l.images)?l.images.length:null,imageIds:Array.isArray(l.images)?l.images.map(i=>String(i.listing_image_id||i.url_fullxfull||i.url_570xN||'')):null,images,primaryImage,listingType:typeof l.type==='string'?l.type:null,daily,id:l.listing_id,title:l.title,url:l.url||'https://www.etsy.com/listing/'+l.listing_id,state:l.state,created,age,price:l.price,image:primaryImage.status==='rank-1'?(primary?.url_570xN||primaryImage.url):null,periods,favorites:l.num_favorers??null};
  });
 }
 function bundleAnalysis(listings,receipts){
@@ -149,6 +160,35 @@ async function syncMarket(force=false){
 }
 function marketStatus(){return {busy:marketBusy,watches:watches().map(w=>{const current=w.history?.at(-1),previous=w.history?.at(-2);return {id:w.id,kind:w.kind,query:w.query,error:w.error,lastAttempt:w.lastAttempt||null,lastSuccess:w.lastSuccess||current?.updated||null,retryAfter:w.retryAfter||null,current:current||null,comparison:market.compare(previous,current),history:(w.history||[]).map(h=>({updated:h.updated,reportedCount:h.reportedCount,sampled:h.sampled}))};})};}
 function status(){return {configured:!!data.key,connected:!!data.tokens,shop:data.shopName||null,shopId:data.shopId?String(data.shopId):null,busy,error:connectionError||data.error||null,lastAttempt:data.lastAttempt||null,lastSuccess:data.lastSuccess||data.snapshot?.salesUpdated||null,lastProductsSuccess:data.lastProductsSuccess||null,lastErrorAt:data.lastErrorAt||null,quota,retryAfter:retryUntil>Date.now()?retryUntil:null,snapshot:data.snapshot||null};}
+async function refreshForPinterest(){
+ if(!data.tokens||!data.shopId)throw Error('Önce Etsy mağazasını bağla ve ürünlerini eşitle.');
+ if(busy)throw Object.assign(Error('Etsy eşitlemesi sürüyor; tamamlanınca paylaşım grubunu yeniden hazırla.'),{kind:'busy',status:409});
+ const ctx=context(),id=String(data.shopId);busy=true;
+ try{
+  persist({...data,lastAttempt:new Date().toISOString()});
+  const user=data.tokens.access_token.split('.')[0];if(!/^\d+$/.test(user))throw Error('Etsy kullanıcı kimliği doğrulanamadı.');
+  const shop=await api('/users/'+user+'/shops',ctx),actual=String(shop.shop_id||shop.results?.[0]?.shop_id||'');assertCurrent(ctx);
+  if(actual!==id||workspace().status().activeShopId!==id)throw Object.assign(Error('Etsy mağazası değişti; eski paylaşım grubu kullanılmadı.'),{kind:'stale',status:409});
+  // Pinterest needs active metadata/images, not another 90-day sales import.
+  const {listings,diagnostics}=await loadActive(id,route=>pages(route,ctx),route=>api(route,ctx));assertCurrent(ctx);
+  if(workspace().status().activeShopId!==id)throw Object.assign(Error('Etsy mağazası değişti; eski paylaşım grubu kullanılmadı.'),{kind:'stale',status:409});
+  const previous=data.snapshot?.shopId===id?data.snapshot:null,updated=new Date().toISOString();
+  const metadata=summarize(listings,[]).map(p=>({...p,periods:[],salesAvailable:false}));
+  const observations=[...(previous?.observations||[]),...listingObservations(previous,metadata,updated)].slice(-100);
+  // Capture only product changes. Reusing old receipts as fresh history would
+  // create false complete-day coverage; sales timestamps remain unchanged.
+  workspace().capture({shopId:id,updated,products:metadata,observations,salesUpdated:null,coverageBasis:'UTC'});
+  const old=new Map((previous?.products||[]).map(product=>[String(product.id),product]));
+  const salesKeys=['periods','daily','dailyMoney','dailyOrders','dailyLines','moneyComplete','salesAvailable'];
+  const products=metadata.map(product=>{const before=old.get(String(product.id));return before?{...product,...Object.fromEntries(salesKeys.filter(key=>before[key]!==undefined).map(key=>[key,before[key]]))}:product;});
+  persist({...data,snapshot:{...previous,shopId:id,updated,products,observations,listingCount:listings.length,diagnostics,coverageBasis:'UTC'},lastProductsSuccess:updated});
+  return {shopId:id,updated,products};
+ }catch(error){
+  if(error.code==='STALE_ACCOUNT'){error.kind='stale';error.status=409;}
+  if(ctx.generation===generation){try{persist({...data,error:'Pinterest ürün kontrolü tamamlanamadı; önceki ürün ve satış kayıtları korundu.',lastErrorAt:new Date().toISOString()});}catch{}}
+  throw error;
+ }finally{if(ctx.generation===generation)busy=false;}
+}
 function accountChanged(){generation++;pending=null;refreshPending=null;busy=false;marketBusy=false;marketQueued=false;workspace().activateShop(null);}
 async function handle(req,res,url){const respond=(code,value)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
  if(!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress)){respond(403,{error:'Yalnizca yerel bilgisayardan erisim.'});return;}
@@ -192,4 +232,4 @@ function start(){
  if(data.tokens)void sync();if(data.key)void syncMarket();
  const marketTimer=setInterval(()=>{if(data.key)void syncMarket();},30*60000);marketTimer.unref();const timer=setInterval(()=>{if(data.tokens)void sync();},30*60000);timer.unref();
 }
-module.exports={handle,start,sync,syncMarket,status,summarize,loadActive,bundleAnalysis,canRestore,restoreResearch,retryAfterMillis,jsonFetch,researchSample,createResearchSampler};
+module.exports={handle,start,sync,syncMarket,status,summarize,listingImages,refreshForPinterest,loadActive,bundleAnalysis,canRestore,restoreResearch,retryAfterMillis,jsonFetch,researchSample,createResearchSampler};

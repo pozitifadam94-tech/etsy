@@ -1,4 +1,38 @@
-# STL Atölyesi — 1.7.0 geliştirme ve doğrulama kaydı
+# STL Atölyesi — 1.8.0 geliştirme ve doğrulama kaydı
+
+12 Ekim 2026. Pinterest bölümü önceki çalışan uygulamaya eklendi. 1.8.0 doğrulaması aşağıda; **199/199 (1.7.0)** ve **149/149 (1.6.0)** sonuçları ayrı tarihsel kayıttır. Yerel testler canlı hesabın erişim onayını kanıtlamaz.
+
+## 1.8.0 kapsamı ve kanıt sınırı
+
+| Alan | Uygulama davranışı | Sınır |
+| --- | --- | --- |
+| Bağlantı | App ID/secret kaydı; resmî OAuth; hesap kimliği; mevcut pano seçimi; yerel bağlantıyı kaldırma | Şifre/çerez yok. Güncel hesap türü, onay koşulları ve localhost kabulü dışarıdan doğrulanmadı; kullanıcı resmî panelden kontrol eder. Kabul edilen localhost veya kayıtlı, kullanıcıya ait HTTPS adresi + elle tam dönüş URL'si kullanılabilir. |
+| Erişim | Varsayılan bilinmiyor; Standard onayı yalnız açık kullanıcı beyanıyla bağlı hesaba kaydedilir | **Kullanıcı beyanı; API üzerinden doğrulanmadı.** OAuth/işletme hesabı/açık pano Standard kanıtı değildir. API'nin isteğe bağlı sayısal hesap kimliği eksikse gerçek yayın engellenir. Trial/Sandbox ayrı test durumudur. |
+| İzin/pano | Resmî v5.28.0 şemasından çıkan beş kapsam: `user_accounts:read,boards:read,boards:write,pins:read,pins:write`; var olan panolar | Yeni pano yok. `PUBLIC` açık, `PROTECTED` korumalı, `SECRET` gizli; gizli kapsamlar varsayılan akışta istenmez. Gizli/korumalı pano herkese açık tanıtım diye sunulmaz. |
+| Görsel | Tek açık `rank === 1`; aynı görselde mümkünse `url_fullxfull`; kimlik/kaynak kaydı; özgün JPEG/PNG byte'larını Base64 ile gönderme | Etsy sıralama kanıtı 2021 tarihli resmî şema; **güncel ilk görsel sırası doğrulanmadı**. Başka görsele sessiz geçiş, kırpma veya düzenleme yok. 8 MiB/12 saniye/yönlendirme/MIME/özel ağ kontrolleri yerel koruma; Pinterest kotası değil. |
+| Pin metni | Etsy başlığı; kısa İngilizce dijital STL açıklaması; doğru Etsy ilan URL'si | Güncel Pinterest şeması: 100 başlık, 800 açıklama, 500 alt metin, 2048 link. Drive/TXT/STL/müşteri verisi ve bilinmeyen teknik/lisans iddiaları kullanılmaz. |
+| Seçim/tekrar | En eski paylaşılmamış aktif ürünler; mağaza + listing_id + Pinterest hesabı; hariç tutma ve eski dış paylaşım beyanı | Başlık/görsel/pano değişimi tekrar hakkı vermez; hesap değişimi o hesabın geçmişini kullanır. Eski manuel pinlerin tamamı otomatik bilinmez. Ürün kalmazsa kuyruk başa sarmaz. |
+| Gün/kalıcılık | Europe/Istanbul gününde en fazla 3 kesinleşen gerçek başarı; başarı günü sonucun kesinleştiği gün olarak muhafazakâr sayılır, gönderim zamanı ayrıca saklanır; belirsiz işler kapasite tutar; tek işlem kilidi; hedefi sabit işler; yeniden açılışta geçmiş | Yerel politika; Pinterest kota/güvenli hacim garantisi değil. Geçmiş günlerden çözümsüz rezervasyonlar da kapasite tutar. Yeni hedef için eski hazır grup yeniden hazırlanır. Pinterest ürün kontrolü satış/sipariş geçmişini yeniden çekmez; satış gününün kapsamını veya başarı tarihini değiştirmez. |
+| Belirsizlik/hata | Hazır/gönderiliyor/başarılı/başarısız/belirsiz/atlandı; kısmi başarıyı koruma; okuma ile aday uzlaştırma; açık çözüm/yeniden deneme | Gönderilmiş olabilecek istek otomatik tekrar POST edilmez. Aynı Etsy URL'si tek başına başarı kanıtı değildir. Kimlik/izin/pano/429 bütün yeni gönderimleri durdurur; durdurma başlamış isteği geri almaz. Tam bir kez yayımlama garantisi yok. |
+| Veri güvenliği | `pinterest-sharing.json`, önceki `.backup`, ayrı geçmiş dışa aktarımı; gizli `pinterest-connection.json` | Olağan workspace yedeği Pinterest kuyruğunu içermez. Token/secret arayüz yanıtı, log, dışa aktarım ve ZIP'e girmez; bağlantı dosyası şifreli değil. Bozuk kuyruk korunur ve gönderim engellenir. |
+| Kullanıcı işlemi | Gerçek yayın görünümünde hesap/pano hazırsa ekran açılınca salt okunur ürün yenilemesiyle önizleme hazırlanır; görünen grubu günlük düğmeyle gönder; ayrı dry-run | Açılışta veya zamanla otomatik yayın yok. Dry-run **sıfır pin oluşturma isteği** yapar. Statik GitHub Pages'de yerel API ve canlı Pinterest yok. |
+
+Resmî Pinterest OpenAPI v5.28.0 ve resmî 2024 OAuth örneği okunabildi; istenen güncel web belgeleri ağ geçidinde `CONNECT 403` aldı. OAuth sorgu isimleri eski resmî örneğe dayanır, güncel web belgesi doğrulanmış sayılmaz. Kullanıcı token yenileme alanları güncel şemadandır. Sıradan kullanıcı OAuth için revoke endpointi desteği doğrulanmadı: yerel bağlantıyı kaldırdıktan sonra Pinterest hesap ayarından uygulama erişimi ayrıca kaldırılır. Ayrıntı: [PINTEREST_SOURCES.md](PINTEREST_SOURCES.md).
+
+## 1.8.0 son doğrulama ve dağıtım
+
+- Tam otomatik test: `node --test` → **299/299 başarılı**, başarısız/atlanmış/iptal edilmiş test yok. Linux, Node.js 24.19.0 ve izole geçici veriler kullanıldı. Pinterest bağlantısı/görsel/kalıcı kuyruk, günlük sınır, gece yarısı ve belirsiz sonuçlar, Origin/hedef koruması ve önceki sürüm testleri kapsandı. Windows dosya yazma dalı simülasyonla kontrol edildi; gerçek Windows çalıştırması yapılmadı.
+- Kalıcı Chromium akışları: önceki teslim/STL ve araştırma kontrolü geçti. Yeni Pinterest kontrolü dört gerçek yerel sunucu senaryosunu geçti: OAuth/pano/erişim, sırasız rank1 görselin özgün byte gönderimi, iki sekme/çift tıklama, 2 başarı + başarısızlık sonrası kalan1, hedef değişimi, durdurma, belirsiz sonuç ve sunucu yeniden başlatma, kullanıcı çözümü, sıfır POST dry-run ve Sandbox ayrımı. Mobil/masaüstü görünümler görsel olarak incelendi. Tüm sağlayıcı yanıtları temsiliydi; gerçek pin yayımlanmadı.
+- Temiz ZIP: **46 uygulama dosyası + SHA-256 manifest**; CRC/yol kontrolü, bütün dosya hashleri ve kaynakla birebir eşleşme geçti. Temiz klasöre açılan 1.8.0 paketinden **üç tarayıcı kontrolü de geçti**: teslim/STL, araştırma ve dört Pinterest senaryosu. Sağlık/sürüm yanıtı 1.8.0; eski 1.7.0 ZIP ve uygulama klasörü korundu. Dağıtım kişisel veri, token, bağlantı dosyası, test veya npm bağımlılığı içermez.
+- GitHub dağıtımı için ayrı `codex/stl-1.8.0-pinterest-sharing` dalı kullanılır. Kaynak ve ZIP gönderimi, uzak indirme ve SHA-256 doğrulamasından sonra doğrudan bağlantı son teslim mesajında verilir; `main` birleştirilmez.
+
+Hedefler: `dist/STL-Atolyesi-1.8.0.zip`, `dist/latest`; ayrı teslim dalı `codex/stl-1.8.0-pinterest-sharing`. Önceki 1.7.0 son sağlam paket korunur; `main` birleştirilmez. Doğrudan GitHub ZIP bağlantısı son teslim mesajında verilir.
+
+**Dışarıda doğrulanmayanlar:** gerçek Pinterest OAuth ve hesap onayı, token yenilemesi, gerçek görsel kabulü/pin görünürlüğü, güncel Etsy ilk görsel sözleşmesi, canlı Etsy snapshot'ı ve gerçek Windows `.cmd` güncellemesi. Bu geliştirme oturumunda gerçek pin yayımlanmadı. Yerel temsili testlerin geçmesi kullanıcının canlı yayın erişimini kanıtlamaz; ilk gerçek paylaşım kullanıcının günlük düğmesiyle başlar. Kurulum [RUN_LATEST.md](RUN_LATEST.md) ve [WINDOWS.md](WINDOWS.md), açık dış doğrulamalar [NEXT_STEPS.md](NEXT_STEPS.md) içindedir.
+
+---
+
+# Tarihsel 1.7.0 — geliştirme ve doğrulama kaydı
 
 12 Ekim 2026. **Araştırmadan İlan Hazırla** mevcut 1.6.0 uygulamasına eklendi; önceki teslim, günlük kontrol, müşteri yardımcısı, mağaza/satış hafızası ve STL araçları korunur. Yeni ücretli API, abonelik veya AI bağlantısı eklenmedi. Araştırma ve metin hazırlama yerel kayıtlarla çalışır; Etsy’de yayımlama kullanıcıya aittir.
 

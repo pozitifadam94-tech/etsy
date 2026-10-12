@@ -1,4 +1,40 @@
-# STL Atölyesi — 1.7.0
+# STL Atölyesi — 1.8.0
+
+**Pinterest paylaşımı**, uygulamanın geçmişinde daha önce paylaşılmamış en fazla üç aktif Etsy ürününü, seçtiğin mevcut Pinterest panosuna ayrı görsel pinler olarak gönderir. İşlem **Pinterest → Grubu hazırla / Etsy’yi güncelle** ile hazırlanır; önizlemeleri gördükten sonra **Bugünün 3 ürününü Pinterest’te paylaş** düğmesiyle başlar. Kalan kapasiteye göre düğme 2 veya 1 ürün gösterir. Açılışta, yenilemede veya saat geldiğinde kendiliğinden pin yayımlanmaz. Önceki araştırma, TXT → Drive teslimi, kayıtlar ve Etsy bağlantısı korunur; yeni ücretli hizmet, bot veya çalışma bağımlılığı eklenmez.
+
+Güncel açılış ve ilk paylaşım adımları: [RUN_LATEST.md](RUN_LATEST.md). Windows kurulumu: [WINDOWS.md](WINDOWS.md). Aday sürümün test/paket/yayım sonucu: [UPGRADE_STATUS.md](UPGRADE_STATUS.md). **1.7.0 ve 1.6.0 test sayıları aşağıda tarihsel kayıttır; 1.8.0 doğrulaması sayılmaz.**
+
+## Pinterest için tek seferlik kurulum
+
+1. [Resmî uygulama panelinde](https://developers.pinterest.com/apps/) uygulamanı kaydet; App ID, App secret ve canlı yayın onayını edin. İşletme hesabı gereksinimini ve güncel hesap/onay şartlarını panelden kontrol et: bu oturumda güncel web belgeleri okunamadığı için hesap türü şartı kesin doğrulanmadı.
+2. **Pinterest → Pinterest bağlantısı ve tek seferlik kurulum** alanına App ID/secret'ı yalnız yerel panelde gir. OAuth dönüş adresini uygulama kaydına birebir ekle. Panel kabul ediyorsa `http://localhost:3000/oauth/pinterest/callback` kullan; kabul etmiyorsa sana ait kayıtlı HTTPS web sitesi adresi ve **OAuth dönüşünü elle tamamla** yolunu kullan. Ücretli tünel gerekmez. Ayrıntı [WINDOWS.md](WINDOWS.md) içindedir.
+3. **Pinterest hesabımı bağla** ile resmî OAuth iznini ver; şifre veya oturum çerezi girilmez. API'nin döndürdüğü hesabı kontrol et, **Panoları getir → Bu panoyu seç** ile erişilebilen mevcut panoyu seç. Uygulama pano oluşturmaz. Herkese açık tanıtım için `PUBLIC` pano seç; `PROTECTED` korumalıdır, `SECRET` gizlidir ve ayrı gizli kapsamlar gerektirir.
+4. Uygulama panelinde Standard/canlı yayın onayını gerçekten gördüysen **Erişim beyanını kaydet**. Etiket **kullanıcı beyanı; API üzerinden doğrulanmadı** kalır ve bağlı hesaba aittir. Varsayılan **erişim türü doğrulanmadı** durumu, Trial veya eksik sayısal hesap kimliği gerçek gönderimi engeller. Başarılı OAuth, açık pano veya işletme hesabı tek başına Standard kanıtı değildir.
+5. **Grubu hazırla / Etsy’yi güncelle** ile güncel aktif ilanları getir. Görseli, başlığı, Etsy hedefini ve panoyu incele; günlük paylaşım düğmesi o ekrandaki grubu gönderme talimatıdır. Her ürün için ek onay istenmez. **Dış paylaşım yapmadan dene** içindeki dry-run hiçbir pin oluşturma isteği göndermez; gerçek başarı sayılmaz.
+
+Varsayılan OAuth kapsamları `user_accounts:read,boards:read,boards:write,pins:read,pins:write` ile sınırlıdır; güncel resmî şema pin oluşturmak için bu beş kapsamın birleşimini gerektirir. Gizli pano, reklam, katalog ve faturalama izinleri kendiliğinden istenmez. Yerel bağlantıyı kaldırmak yerel tokenları siler; Pinterest hesabındaki uygulama erişimini ayrıca hesap ayarlarından kaldırmalısın.
+
+## Görsel, günlük sınır ve geçmiş
+
+Yalnız **tam olarak bir açık `rank === 1` kaydı** seçilir; mümkünse o görselin `url_fullxfull` adresi kullanılır. Dizi sırası, en küçük rank veya ikinci görsel yedek seçim değildir. Eksik/belirsiz rank 1, alınamayan görsel veya artık aktif olmayan ilan engelli gösterilir. Rank 1 kuralının kanıtı Etsy'nin **2021 tarihli resmî şemasıdır; güncel resmî ilk görsel sırası doğrulanmadı**. Kaynak ve görsel kimliği önizleme/kayıtta gösterilir; bunu güncel doğrulanmış ilk görsel iddiası olarak okumamalısın. [PINTEREST_SOURCES.md](PINTEREST_SOURCES.md) kaynakları ve erişim engellerini kaydeder.
+
+İndirilen JPEG/PNG'nin özgün byte'ları Base64 görsel medyası olarak iletilir; düzenleme, kırpma, yazı/logo veya yeniden üretim yapılmaz. 8 MiB ve 12 saniye, güvenli HTTPS/uzak adres/yönlendirme/MIME kontrolleriyle birlikte **yerel indirme korumalarıdır; Pinterest kotası değildir**. Pinterest'in kendi görüntüleme işlemi byte'ları koruma garantisi vermez. Başlık Etsy başlığından, kısa İngilizce açıklama doğrulanmış dijital STL bilgisinden gelir; bilinmeyen baskı/lisans iddiaları eklenmez. Pin hedefi `https://www.etsy.com/listing/<listing_id>` olur; Drive bağlantısı, teslim TXT'si, STL veya müşteri bilgisi pin içeriğine girmez.
+
+**Europe/Istanbul gününde en fazla üç gerçek başarı** ve çözümlenmemiş belirsiz isteklerin kapasite rezervasyonu birlikte sayılır. Bu uygulamanın politikasıdır. Kalıcı kayıt ve tek işlem kilidi yeniden açılış, çift tıklama ve ikinci sekmede sınırı korur; geçmiş günlerden belirsiz işler de çözülene kadar kapasite tutar. Tekrar kimliği **mağaza + listing_id + Pinterest hesabı**dır; başlık/görsel/pano değişmesi aynı ürünü yeniden açmaz. En eski paylaşılmamış aktif ürünler önce seçilir; ürün kalmayınca liste başa sarmaz. Hariç tutma ve **önceden dışarıdan paylaşıldı** kaydı aynı bağlama aittir; uygulama eski manuel pinlerin tamamını otomatik bilmez.
+
+Kısmi başarılar korunur. Kimlik, izin, pano veya 429 hatası yeni gönderimleri durdurur; ürün hatası ayrı gösterilir. Zaman aşımı veya yorumlanamayan gönderim sonucu **kontrol gerekli** olur ve otomatik tekrar POST edilmez. Okuma sonuçları olası eşleşmelerdir; aynı Etsy bağlantısı tek başına kesin başarı kanıtı değildir. Pinterest'i kontrol edip pin bağlantısı/sonucunu açıkça kaydet; yeniden deneme ayrı kullanıcı işlemidir. **Yeni gönderimleri durdur** başlamış isteği veya oluşmuş pini geri almaz. Her koşulda tam bir kez yayımlama garantisi yoktur.
+
+## Pinterest kayıtlarını koru
+
+Windows kullanıcı veri klasöründe `%LOCALAPPDATA%\STLNicheLab\pinterest-sharing.json` kuyruk/geçmişi, `pinterest-sharing.json.backup` önceki yerel kayıt kopyasını tutar. **Pinterest geçmişini indir** kimlik bilgisi içermeyen ayrı dışa aktarımdır. Olağan çalışma alanı JSON yedeği Pinterest kuyruğunu içermez; güncelleme öncesi ikisini de indir ve veri klasörünü silme. Bozuk Pinterest dosyası sessizce sıfırlanmaz; gönderim engellenir ve özgün dosya korunur.
+
+`pinterest-connection.json` App secret ve tokenları ayrı tutar; şifreli değildir. Bu dosyayı, Etsy `connection.json` dosyasını veya tüm veri klasörünü sohbete/GitHub'a gönderme. Gizli dosyalar normal dışa aktarıma veya dağıtım ZIP'ine girmez. Statik GitHub Pages görünümünde yerel API/bağlantı ve canlı Pinterest paylaşımı yoktur.
+
+Bu geliştirme oturumunda gerçek Pinterest hesabıyla OAuth, token yenileme, görsel kabulü veya herkese açık pin yayını denenmedi; gerçek pin oluşturulmadı. Yerel/temsili testler uygulama davranışını doğrular, kullanıcının canlı erişimini kanıtlamaz. İlk gerçek yayın yalnız sen yerel uygulamadaki günlük düğmeye bastığında başlar.
+
+---
+
+# Tarihsel sürüm kaydı — 1.7.0
 
 GoatDesgnShop için ücretsiz, kişisel ve Türkçe çalışma alanı. **1.7.0**, ürünün gerçek bilgileri ve kaynakları ayrı tutulan araştırmadan İngilizce Etsy ilan taslağı hazırlama akışını ekler. Önceki ürün eleme, değişiklik/satış takibi, teslim hazırlığı ve STL kontrolü korunur. Ücretli AI API, n8n, harici npm paketi veya abonelik gerekmez.
 

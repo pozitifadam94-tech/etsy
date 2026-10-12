@@ -9,3 +9,8 @@ backups/
 recovery/
 
 dist/
+pinterest-connection.json
+pinterest-connection.json.*
+pinterest-sharing.json
+pinterest-sharing.json.*
+pinterest-backups/

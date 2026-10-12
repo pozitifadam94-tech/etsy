@@ -48,7 +48,7 @@ async function refreshWorkspace(){
  if(j.revision!==stateRevision){clearUndo();state=j.state||initial();validate(state);stateRevision=j.revision;}
  workspaceData=j;if(scopeChanged)resetScopeInputs();if(scopeChanged){render();renderSharing();}renderWorkbench();
 }
-function renderWorkbench(){if(dashboardReady&&window.STLWorkbench)window.STLWorkbench.render();if(dashboardReady&&window.STLAtelierUI)window.STLAtelierUI.render();if(dashboardReady&&window.STLResearchUI)window.STLResearchUI.render();}
+function renderWorkbench(){if(dashboardReady&&window.STLWorkbench)window.STLWorkbench.render();if(dashboardReady&&window.STLAtelierUI)window.STLAtelierUI.render();if(dashboardReady&&window.STLResearchUI)window.STLResearchUI.render();if(dashboardReady&&window.STLPinterestUI)window.STLPinterestUI.render();}
 
 function render(){
  renderExtras();
@@ -351,9 +351,9 @@ function activateWorkspace(focus=false){
  let requested;try{requested=decodeURIComponent(location.hash.slice(1));}catch{requested='overview';}
  const active=panels.find(p=>p.id===requested)||document.querySelector('#overview');
  for(const panel of panels)panel.hidden=panel!==active;renderWorkbench();
- document.querySelectorAll('aside nav a').forEach(a=>{const parentRoute=['listing-audit','daily','change-evaluations','history','files'].includes(active.id)?'shop':active.id==='finance'?'weekly':!['overview','shop','weekly','opportunities','market','live','deliveries','preparation','listing-research'].includes(active.id)?'live':active.id;const selected=a.getAttribute('href')==='#'+parentRoute;if(selected){a.setAttribute('aria-current','page');const group=a.closest('details');if(group)group.open=true;}else a.removeAttribute('aria-current');});
+ document.querySelectorAll('aside nav a').forEach(a=>{const parentRoute=['listing-audit','daily','change-evaluations','history','files'].includes(active.id)?'shop':active.id==='finance'?'weekly':!['overview','shop','weekly','opportunities','market','live','deliveries','preparation','listing-research','pinterest'].includes(active.id)?'live':active.id;const selected=a.getAttribute('href')==='#'+parentRoute;if(selected){a.setAttribute('aria-current','page');const group=a.closest('details');if(group)group.open=true;}else a.removeAttribute('aria-current');});
  const heading=active.querySelector('h2');
- const names={'listing-research':'Araştırmadan İlan Hazırla',deliveries:'Teslim ve hazırlık',preparation:'İlan taslakları',files:'Dosya kontrolü',history:'Hafıza',messages:'Müşteri yanıtları','change-evaluations':'Sonuç takibi',overview:'Bugün',shop:'Ürünler',weekly:'Satışlar',opportunities:'Ürün grupları',market:'Pazar gözlemi',live:'Ayarlar'};document.querySelector('#workspace-title').textContent=names[active.id]||heading?.textContent||'Çalışma alanı';document.querySelector('#workspace-subtitle').textContent=active.id==='overview'?'Mağazana bir bakış. Sonraki adımın burada.':'Verilerin hazır. Ayrıntılara gerektiği kadar bak.';
+ const names={pinterest:'Pinterest paylaşımı','listing-research':'Araştırmadan İlan Hazırla',deliveries:'Teslim ve hazırlık',preparation:'İlan taslakları',files:'Dosya kontrolü',history:'Hafıza',messages:'Müşteri yanıtları','change-evaluations':'Sonuç takibi',overview:'Bugün',shop:'Ürünler',weekly:'Satışlar',opportunities:'Ürün grupları',market:'Pazar gözlemi',live:'Ayarlar'};document.querySelector('#workspace-title').textContent=names[active.id]||heading?.textContent||'Çalışma alanı';document.querySelector('#workspace-subtitle').textContent=active.id==='overview'?'Mağazana bir bakış. Sonraki adımın burada.':'Verilerin hazır. Ayrıntılara gerektiği kadar bak.';
  if(heading)heading.tabIndex=-1;
  if(focus){document.querySelector('aside').classList.remove('is-open');document.querySelector('#menu-toggle').setAttribute('aria-expanded','false');heading?.focus({preventScroll:true});active.scrollIntoView({block:'start'});}
 }
@@ -374,6 +374,7 @@ window.STLResearchUI.init({getState:()=>state,getWorkspace:()=>workspaceData,get
  async createLocalProduct(title){const scope=workspaceData?.activeShopId||null,id='local-'+crypto.randomUUID(),p={id,title:String(title||'').trim().slice(0,1000),local:true,url:''};if(!p.title)throw Error('Ürün adı gerekiyor.');state.delivery??=STLDelivery.emptyState();state.delivery.products[id]=STLDelivery.createProduct(p,{shopId:scope||''});if(!save())throw Error('Ürün hazırlığı kaydedilemedi.');await writeQueue;if(saveBlocked||(workspaceData?.activeShopId||null)!==scope)throw Error('Ürün hazırlanırken mağaza veya kayıt durumu değişti.');return p;}
 });
 document.addEventListener('click',event=>{const b=event.target.closest('[data-research-product]');if(b)void STLResearchUI.openProduct(b.dataset.researchProduct).catch(error=>message(error.message,true));});
+window.STLPinterestUI.init({getState:()=>state,getWorkspace:()=>workspaceData,getLive:()=>liveState,isLocal:localAPI,message,openWorkspace,downloadJSON});
  dashboardReady=true;renderOverview();activateWorkspace();
 
 })().catch(error=>{const el=document.querySelector('#message');el.textContent='Panel başlatılamadı: '+error.message;el.className='error';});

@@ -26,7 +26,7 @@ test('ZIP rejects traversal, ambiguous names and duplicates before writing', () 
 });
 
 async function fixture(root) {
-  const names = ['etsy.js', 'workspace.js', 'history.js', 'observations.js', 'market.js', 'updates.js', 'workspace-api.js', 'README.md', 'WINDOWS.md', 'RUN_LATEST.md', 'UPGRADE_STATUS.md', 'NEXT_STEPS.md', 'windows-start.cmd', 'windows-shortcut.cmd', 'scripts/launch.js'];
+  const names = ['pinterest.js', 'pinterest-client.js', 'pinterest-store.js', 'pinterest-media.js', 'etsy.js', 'workspace.js', 'history.js', 'observations.js', 'market.js', 'updates.js', 'workspace-api.js', 'README.md', 'WINDOWS.md', 'RUN_LATEST.md', 'UPGRADE_STATUS.md', 'NEXT_STEPS.md', 'windows-start.cmd', 'windows-shortcut.cmd', 'scripts/launch.js'];
   for (const name of names) {
     const filename = path.join(root, name);
     await fs.mkdir(path.dirname(filename), {recursive: true});

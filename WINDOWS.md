@@ -1,4 +1,31 @@
-## 1.7.0 — Araştırmadan ilan hazırlama ve Drive üzerinden TXT teslimi
+## 1.8.0 — Pinterest paylaşımını aç
+
+Güncel yönerge [RUN_LATEST.md](RUN_LATEST.md), son test ve paket/yayım kaydı [UPGRADE_STATUS.md](UPGRADE_STATUS.md) içindedir. Dağıtım dosyası `STL-Atolyesi-1.8.0.zip`; teslim mesajındaki doğrulanmış doğrudan indirme bağlantısını kullan. Node.js 20+ gerekir; yeni npm çalışma bağımlılığı veya ücretli hizmet yok.
+
+1. Eski uygulamadan çalışma alanı yedeğini indir. Pinterest'i kullanmaya başladıysan ayrıca **Pinterest → Pinterest geçmişini indir** kullan: olağan JSON yedeği bu kuyruğu içermez.
+2. Eski sunucu penceresini kapat; yeni ZIP'i ayrı, boş bir klasöre çıkar ve `windows-start.cmd` aç. `%LOCALAPPDATA%\STLNicheLab` veri klasörünü koru. Tarayıcı açılmazsa `http://localhost:3000` aç; pencere açık kalsın. Yeni klasörden `windows-shortcut.cmd` çalıştırarak kısayolu güncelle.
+3. Yerel panelde **Pinterest → Pinterest bağlantısı ve tek seferlik kurulum** alanını aç. [Pinterest uygulama panelinde](https://developers.pinterest.com/apps/) uygulama kaydı, App ID/secret, hesap türü/işletme hesabı gereksinimi ve Standard/canlı yayın onayını kontrol et. Güncel hesap türü ve onay koşulları bu oturumda tam doğrulanmadı.
+4. Aşağıdaki OAuth dönüş yolunu seç, uygulama kaydına birebir ekle ve App ID/secret ile aynı adresi yerel forma kaydet. **Pinterest hesabımı bağla** ile resmî izin ekranını tamamla.
+5. Bağlı hesabı kontrol et; **Panoları getir → Bu panoyu seç** ile mevcut panoyu seç. `PUBLIC` açık, `PROTECTED` korumalı, `SECRET` gizlidir; gizli panonun ayrı izinleri varsayılan bağlantıda istenmez. Uygulama pano oluşturmaz. Standard onayını gerçekten gördüysen kutuyu işaretleyip **Erişim beyanını kaydet**; bu hesaba bağlı **kullanıcı beyanı; API üzerinden doğrulanmadı** etiketiyle kalır.
+6. **Grubu hazırla / Etsy’yi güncelle** ile önizlemeleri aç. Görseli, Etsy ilanını ve panoyu kontrol edip **Bugünün 3 ürününü Pinterest’te paylaş** düğmesine bas. Kalan sayı 2 veya 1 olabilir. Dry-run gerçek pin göndermez. Kurulum/izin/kimlik engeli varsa düğme nedenini gösterir.
+
+### OAuth dönüş adresi
+
+Pinterest uygulama paneli **kabul ediyorsa** `http://localhost:3000/oauth/pinterest/callback` adresini kaydet; Etsy callback'i farklıdır. Bu localhost adresinin Pinterest tarafından kabulü bu oturumda doğrulanmadı.
+
+Panel localhost'u kabul etmiyorsa **sana ait, uygulamanda kayıtlı HTTPS web sitesi adresini** kullan. Bu adresin Pinterest'in güncel kayıt/onay koşullarına uygunluğunu panelden doğrula. Aynı tam adresi yerel forma gir, OAuth'u yerel panelden başlat ve Pinterest dönüşünden sonra tarayıcı adres çubuğundaki `code` ve `state` içeren tam dönüş URL'sini kopyala. **OAuth dönüşünü elle tamamla** alanına yapıştır; yerel sunucu kayıtlı adresi ve başlatılan işlemin `state` değerini kontrol ederek kodu resmî token endpointinde değişir. Web sitesine token/App secret ekleme, dönüş URL'sini sohbette paylaşma. Dönüş çalışmasa bile adres çubuğundaki URL görülebiliyorsa kullanılabilir; kod yoksa OAuth'u yeniden başlat. Ücretli tünel veya tarayıcı botu gerekmez.
+
+Şifre/oturum çerezi girilmez. API hesap yanıtı sayısal kimlik döndürmezse kullanıcı adı görüntülenebilir, fakat güvenli kalıcı hesap eşleştirmesi kurulamadığı için gerçek paylaşım engellenir. OAuth başarılı olsa da erişim türü varsayılan olarak **doğrulanmadı** kalır; Trial/Sandbox gerçek herkese açık başarı sayılmaz.
+
+### Kayıt ve sorun çözme
+
+Kuyruk/geçmiş `pinterest-sharing.json`, önceki yerel kopya `pinterest-sharing.json.backup`, gizli bağlantı `pinterest-connection.json` dosyasındadır; hepsi `%LOCALAPPDATA%\STLNicheLab` altında kalır. Bağlantı dosyası şifreli değildir; paylaşma. ZIP değiştirmek kayıtları sıfırlamaz. Çalışma alanı yedeği Pinterest dosyalarının yerine geçmez; ayrı geçmiş dışa aktarımını sakla. **Yerel bağlantıyı kaldır** tokenları yerelden siler; Pinterest hesap ayarlarından uygulama erişimini ayrıca kaldır.
+
+**Sonucu belirsiz / kontrol gerekli** iş otomatik yeniden gönderilmez, çözülene kadar günlük kapasite tutar. Geçmişte **Olası pinleri kontrol et** ve sonucu kaydetme yolunu kullan; aynı Etsy URL'si tek başına başarı kanıtı değildir. Bilinen başarısız iş için açık yeniden hazırlama gerekir. Kimlik/izin/pano/429 hatasında önce belirtilen engeli düzelt; tekrar basarak beklemeyi aşma. **Yeni gönderimleri durdur** başlamış isteği geri çekmez. Windows `.cmd`, gerçek Pinterest/Etsy hesabı ve gerçek pin görünürlüğü bu Linux geliştirme oturumunda doğrulanmadı.
+
+---
+
+## Tarihsel 1.7.0 — Araştırmadan ilan hazırlama ve Drive üzerinden TXT teslimi
 
 Güncel açılış yönergesi **RUN_LATEST.md** içindedir. Eski sunucu penceresini kapat, `STL-Atolyesi-1.7.0.zip` dosyasını yeni bir klasöre çıkar ve `windows-start.cmd` aç. Node.js 20+ dışında yeni çalışma bağımlılığı veya ücretli hizmet yok. Temiz paket ve tarayıcı doğrulamasının sonucu **UPGRADE_STATUS.md** içindedir; Windows `.cmd` çalıştırması bu Linux ortamında denenmedi.
 
@@ -32,7 +59,7 @@ Müşteri mesajlarına otomatik erişim yok. Konu önerisi anahtar kelimelerle �
 
 ---
 
-Aşağıdaki önceki sürüm notları tarihsel kurulum ayrıntılarıdır. Güncel kullanım için yukarıdaki 1.7.0 bölümü ve RUN_LATEST.md geçerlidir.
+Aşağıdaki önceki sürüm notları tarihsel kurulum ayrıntılarıdır. Güncel kullanım için yukarıdaki 1.8.0 bölümü ve RUN_LATEST.md geçerlidir.
 
 # Windows'ta baslatma
 

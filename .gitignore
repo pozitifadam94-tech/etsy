@@ -7,3 +7,5 @@ workspace.json
 workspace.json.tmp
 backups/
 recovery/
+
+dist/

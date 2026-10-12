@@ -1,6 +1,50 @@
-# STL Atölyesi — 1.5.0
+# STL Atölyesi — 1.7.0
 
-GoatDesgnShop için ücretsiz, kişisel ve Türkçe çalışma alanı. Amaç Etsy Stats’ı yeniden göstermekten öte **ürün seçmeden önce elemek, değişikliklerin sonucunu takip etmek ve STL dosyasını incelemek**. Ücretli AI API, n8n, harici npm paketi veya abonelik gerekmez.
+GoatDesgnShop için ücretsiz, kişisel ve Türkçe çalışma alanı. **1.7.0**, ürünün gerçek bilgileri ve kaynakları ayrı tutulan araştırmadan İngilizce Etsy ilan taslağı hazırlama akışını ekler. Önceki ürün eleme, değişiklik/satış takibi, teslim hazırlığı ve STL kontrolü korunur. Ücretli AI API, n8n, harici npm paketi veya abonelik gerekmez.
+
+**Gerçek teslim yöntemi:** müşteri Etsy'den TXT indirir; TXT'deki bağlantıyı açarak Google Drive **klasörüne** gider ve STL dosyalarını oradan indirir. Etsy ilan URL'si yönetim adresidir, teslim bağlantısı değildir. Gerçek Drive bağlantısı teslim TXT’sinde kalır; herkese açık ilan metnine, araştırma raporuna veya ChatGPT aktarımına eklenmez. STL sıkıştırma/ZIP paketleme ana teslim yöntemi değildir.
+
+## Tek ürünle ilk araştırma
+
+**Araştırmadan ilan** bölümünde mevcut ürününü seçip **Araştırmayı aç** düğmesine bas; ürün kartındaki **Araştırmadan İlan Hazırla** düğmesini de kullanabilirsin. Henüz Etsy ilanı yoksa **Yeni yerel ürün** ile başla. Kayıtlı çalışmayı **Kaldığım yerden devam et** ile yeniden aç.
+
+1. **Ürün bilgisi:** İngilizce konu/görünüm, tek model veya set, bilinen model sayısı, içerik ve formatları kaydet. Teknik özellikleri yalnız gerçekten doğruladıysan işaretle. İsteğe bağlı görsel önizlemeleri saklanabilir; görsel tanıma/OCR yapılmaz, dosya adından baskı testi, destek, ölçek veya lisans çıkarılmaz.
+2. **Kelimeler:** ürün bilgilerinden aday oluştur veya kendi ifadeni ekle. Ürün önerisi, rakip başlığında gözlenen ifade, kullanıcının aktardığı Marketplace Insights kanıtı ve kullanıcı eklemesi ayrı kaynaklardır; aday olmak arama hacmi kanıtı değildir.
+3. **Veri aktarımı:** ifadeyi kopyala, resmî yardım/Shop Manager bağlantısından kendi Marketplace Insights ekranını aç. Başlıklı metin/tabloyu yapıştır veya **Sade giriş tablosu** kullan. **Önizleme** içindeki değerleri kontrol edip açıkça doğrulayarak kaydet. Boş alan bilinmiyor, `0` gerçek sıfır, `<10` eşik altıdır. Yalnız kaynağın bildirdiği dönem/bölge/dili yaz. Aynı veri tekrar aktarılırsa çoğalmaz; farklı dönemler ayrı kalır. Önceki aynı mağaza araştırmasını yeniden kullanmak eski tarihini korur.
+4. **Karşılaştır ve seç:** ürün uygunluğu ve dijital/fiziksel alıcı niyetini incele; ana hedef, destekleyici, alternatif veya elenen ifadeyi Türkçe gerekçeyle kaydet. İsteğe bağlı API örneklemi, en fazla ilk 100 aktif ilanı yeni ilana göre sıralar; dijital STL/fiziksel/diğer dijital/bilinmeyen ayrımı düzeltilebilir, tekrar ilanlar ve mağaza yoğunlaşması gösterilir. Örneklem bütün pazar, müşteri sırası, arama hacmi veya rakip özel satışları değildir.
+5. **İlan taslağı:** **Yerel taslak hazırla ve sürüm kaydet** ile İngilizce ana başlık, en fazla iki alternatif, uygun etiketler ve doğal açıklama oluştur. Yerel yöntem şablondur; AI üretimi gibi sunulmaz. 13 uygun etiket bulunamazsa eksik sayı gösterilir. Araştırma yoksa taslak açıkça **ürün bilgilerine dayalı, arama verisiyle doğrulanmamış** olarak etiketlenir. Gerekçe, eksik bilgi ve manuel inceleme uyarılarını kontrol et.
+6. **Kaydet ve kullan:** düzenlemeyi yeni sürüm kaydet; başlık/etiket/açıklamayı kopyala veya ilan/araştırma JSON’unu indir. Her sürümün ürün bilgileri, seçimi, kaynakları ve araştırma tarihi ilk dayanağıyla korunur. Hazırlık alanına kopyalama önce fark önizlemesi açar. Metni Etsy’ye kendin uygularsın; kopyalama veya indirme yayımlama sayılmaz.
+
+İsteğe bağlı **ChatGPT aktarımı**: aktarım metnini hazırla ve kendi ChatGPT oturumuna kopyala; yanıtın yalnız istenen JSON alanlarını içermesini iste. **AI yanıtı JSON → Alanları kontrol et ve önizle** adımından sonra incelenen sonucu yerel sürüm kaydet. Uygulama AI servisine bağlanmaz. Bozuk JSON araştırmayı değiştirmez; desteklenmeyen iddialar incelemeye işaretlenir. AI’nın yeni kelimeleri araştırılmış sayılmaz; istersen yalnız aday olarak açıkça eklersin. Görsel göndermek istersen ChatGPT’ye kendin ayrıca eklersin.
+
+Yayımladıktan sonra **Yayımladığım Etsy ilanıyla ilişkilendir** alanında bağlı mağazanın canlı ilanını seçebilirsin. Saklanan başlangıç, yerel taslak ve onun araştırma dayanağıdır; Etsy’de aynı metnin yayımlandığı doğrulanmaz. Mevcut satış/değişiklik takibi gösterilebilir; trafik ve arama terimleri bilinmiyorsa açıkça belirtilir. Satış farkı tek başına SEO etkisi veya kelimenin başarısızlığı değildir.
+
+## Araştırma verisinin sınırı
+
+Marketplace Insights bu sürümde kullanıcı aktarımıyla çalışır; otomatik erişimi doğrulanmış bir API bağlantısı yoktur. 12 Ekim 2026’daki güncel Help/Handbook/API belge istekleri `CONNECT 403` ile engellendi; resmî GitHub README’si okunabildi. Ücretsiz kota, varsayılan veri dönemi, güncel taxonomy/özellikler ve resmî alan sınırları doğrulanmış sayılmaz. Şimdiki **140/13/20** kontrolleri yerel taslak korumasıdır; kategori kimliği tahmin edilmez, kategori/özellik önerisi yayın ekranında incelenir. SEO puanı, başarı olasılığı veya arama/ilan oranından satış garantisi üretilmez. Ayrıntılı kaynak kaydı: [RESEARCH_SOURCES.md](RESEARCH_SOURCES.md).
+
+1.7.0’ın son test, temiz ZIP ve dağıtım sonuçları [UPGRADE_STATUS.md](UPGRADE_STATUS.md) içinde kaydedilir. Açılış: [RUN_LATEST.md](RUN_LATEST.md). Önceki 1.6.0 tesliminin tarihsel doğrulama kaydı aynı dosyada korunur.
+
+## 1.6.0’dan korunan çalışma akışı
+
+- **Teslim ve hazırlık:** Etsy ürününü seçip Drive klasörünü bir kez bağla. İstersen mevcut TXT'leri toplu seç; bağlantı/ilan önerisini kontrol et. Birden fazla link veya belirsiz ad eşleşmesi otomatik kabul edilmez. Kaynak TXT değişmez.
+- **Teslim TXT'si:** İngilizce şablonu önizle/düzenle, sürüm olarak kaydet ve indir; sonra Etsy'ye kendin yükle. Eski sürümü incele ve yeni sürüm olarak geri al. Uygulama yerel TXT'yi Etsy'ye yüklenmiş gibi göstermez.
+- **İlan taslakları:** başlık/açıklama/etiket bulguları, düzenlenebilir taslak, fark ve geri alma. Seçili ürünlere TXT → Drive teslim açıklaması toplu hazırlanabilir. Yerel taslak Etsy'ye gönderilmez.
+- **Günlük kontrol:** mağaza eşitlemesi, en fazla üç zamanı gelmiş klasör kontrolü ve yerel hazırlık birlikte değerlendirilir. Kısmi hata diğer işleri durdurmaz. En fazla üç öncelikli iş gösterilir; erteleme/inceleme aynı kaynak değişmedikçe tekrarı önler. İptal, başlamış uzak okumayı her durumda durduramaz.
+- **Ürüne bağlı müşteri yardımcısı:** TXT/link/izin/eksik dosya/ZIP/ölçek için düzenlenebilir İngilizce şablon; mesaj gönderilmez. Yalnız ürün–sorun–tarih kaydı saklanır. ChatGPT bağlamı varsayılan olarak gerçek Drive linklerini ve ham müşteri mesajını dışarıda bırakır. AI JSON yalnız desteklenen alanlarla yerel taslağa alınır.
+- **Etsy hesabı bağlamadan:** yerel hazırlık ürünü ekleyip bilgileri, araştırmayı ve TXT taslağını saklayabilirsin. Drive sayfasını kontrol etmek ağ gerektirir. Google OAuth zorunlu değildir; Drive hesabının arşivi taranmaz/indirilmez. Yerel model kontrolü isteğe bağlıdır.
+
+### Güncellemede kayıt güvenliği
+
+Mağazalar `shop_id` ile ayrılır. Geç yanıt ve yanlış mağazaya yazma reddedilir. Mağazası bilinmeyen eski kayıt silinmez veya otomatik atanmaz; Ayarlar'da yalnız kullanıcı açıkça doğrularsa bağlı mağazaya birleştirilir. Özgün kopya ve işlem öncesi yedek korunur. Bozuk bağlantı dosyası paneli durdurmaz; yeniden ayarlama yalnız kullanıcı işlemidir. Pazar kayıtlarının asıl deposu workspace.json'dır; geri yüklemede iki ayrı dosyaya yazma gerekmez.
+
+### Kontrollerin sınırı
+
+Oturumsuz Drive kontrolü çerez veya sahibin tokenını kullanmadan, en fazla 512 KiB HTML ve 12 saniyelik istekle **klasör sayfasını** inceler. HTTP 200 tek başına başarı değildir; tanınmayan görünüm/kota/engellenmiş yanıt doğrulanamadı olarak gösterilebilir. Klasör sayfasının açılması dosyaların indirilebildiğini, doğru içeriği veya STL kalitesini kanıtlamaz. Paket içeriği beyanı ve yerel geometri ayrı sonuçlardır. Gerçek Drive/Windows doğrulaması yapılmadı. Güncel Google/Etsy OAuth, biçim ve kota koşullarına dış erişim engellendiğinden kesin güncel koşul iddiası yok; taslak sınırları yerel doğrulama kurallarıdır.
+
+Zaman damgaları İstanbul saatinde gösterilir; eski satış günlerini yanlış dönüştürmemek için analiz takvimi açıkça **UTC tam günleri** olarak kalır. İstanbul satış günü geçişi tamamlanmış değildir. Sonradan iptal/değişen sipariş düzeltmeleri son 90 günlük oluşturulma penceresi içinde alınır. Brüt ürün bedeli ücret/iade sonrası net kâr değildir.
+
+Son teslim ve doğrulama: [RUN_LATEST.md](RUN_LATEST.md), [UPGRADE_STATUS.md](UPGRADE_STATUS.md), açık işler: [NEXT_STEPS.md](NEXT_STEPS.md).
 
 ## Başlatma ve güncelleme
 
@@ -48,7 +92,7 @@ Temel açık kenar, ikiden fazla yüz birleşimi, tutarsız yüz yönü ve sıf�
 
 Anahtarları yalnızca yerel formda gir; OAuth callback `http://localhost:3000/oauth/callback`. Kullanılan izinler `listings_r shops_r transactions_r`. Salt okunur bağlantı, başlangıçta ve sunucu açıkken 30 dakikada bir mağaza eşitlemesi. Bilgisayar/uygulama kapalıyken takip yoktur.
 
-Son 90 günlük ödenmiş, iptal edilmemiş sipariş satırları alınır. Adet, ürün miktarıdır; satır sayısı benzersiz sipariş sayısı değildir. Ürün bedeli net kâr, Etsy bakiyesi veya ücret/iade sonrası gelir değildir. Görüntülenme, kaynak trafiği, reklam, iadeler ve Etsy ücretleri bu bağlantıda otomatik alınmaz. Para birimleri ayrı tutulur.
+Son 90 günlük ödenmiş, iptal edilmemiş sipariş satırları alınır. Adet, ürün miktarıdır. Benzersiz sipariş ve işlem satırı ayrıca tutulur; eski kayıtta olmayan sayılar uydurulmaz. Ürün bedeli net kâr, Etsy bakiyesi veya ücret/iade sonrası gelir değildir. Görüntülenme, kaynak trafiği, reklam, iadeler ve Etsy ücretleri bu bağlantıda otomatik alınmaz. Para birimleri ayrı tutulur.
 
 Pazar takipleri en fazla 10 mağaza/arama, her gözlem ilk 100 ilan ve son 30 başarılı pazar gözlemiyle sınırlıdır. Aramalar yeni ilana göre sıralanır; tüm pazarın temsilî örneklemi değildir. Sunucu açıkken altı saatlik yenileme, manuel en az 10 dakika, hata sonrası 1 saat/429 sonrası 6 saat bekleme sürer. Başlığında STL geçen `download` ilanlar ayrı incelenir. Dosya türünün gerçekten STL olduğu doğrulanmaz. Sonuç sayısı arama hacmi değildir; rakip özel satışlarına erişilmez. Yeni gözlenen ilan yeni yayımlanmış, örneklemden çıkan ilan kaldırılmış sayılmaz.
 
@@ -62,12 +106,12 @@ Pazar takipleri en fazla 10 mağaza/arama, her gözlem ilk 100 ilan ve son 30 ba
 
 Yerel kayıtlar `%LOCALAPPDATA%\STLNicheLab\workspace.json` içinde; günlük ve geri yükleme öncesi yedekler `backups` klasöründedir. Son 30 yedek saklanır. Tarayıcı ilk açılışta eski kayıtları taşır; farklı eski kayıt varsa mevcut depoyu ezmeden ayrıca yedekler. İlk taşıma eski tarayıcı ve aynı localhost adresinde yapılmalı; sonrasında tarayıcı temizlense de ortak kayıtlar kalır. Birden fazla sekmede eski revizyonla kayıt üzerine yazılmaz; hata alan sekmenin kopyası dışa aktarılabilir.
 
-Tam yedek araştırma, notlar, dosya kontrol özetleri, mağaza geçmişi, pazar gözlemleri ve okunmuş sonuçları içerir. Önceki düz araştırma yedekleri desteklenir. Geçersiz yedek mevcut veriyi değiştirmez; başarılı geri yükleme öncesinde mevcut durum ayrıca yedeklenir. Etsy anahtarları/tokens tam yedeğe girmez. Dosya depo sınırı 32 MB; aşılırsa kaydetme hatası açıkça gösterilir. Bozuk yerel depo sessizce sıfırlanmaz: kaydetme durur, Ayarlar’dan geçerli yedek geri yüklenebilir; özgün bozuk dosya `recovery` klasöründe korunur.
+Tam yedek ilan araştırmaları ve dayanaklı taslak sürümleri, notlar, dosya kontrol özetleri, mağaza geçmişi, pazar gözlemleri ve okunmuş sonuçları içerir. Önceki düz araştırma yedekleri desteklenir. Geçersiz yedek mevcut veriyi değiştirmez; başarılı geri yükleme öncesinde mevcut durum ayrıca yedeklenir. Etsy anahtarları/tokens tam yedeğe girmez. Dosya depo sınırı 32 MB; aşılırsa kaydetme hatası açıkça gösterilir. Bozuk yerel depo sessizce sıfırlanmaz: kaydetme durur, Ayarlar’dan geçerli yedek geri yüklenebilir; özgün bozuk dosya `recovery` klasöründe korunur.
 
-Etsy anahtarları, OAuth tokenları ve güncel snapshot ayrı `connection.json` içinde kalır; şifreli değildir ve paylaşılmamalıdır. ZIP değişimi bu dosyaları değiştirmez. Statik GitHub Pages önizlemesi yerel API/depo içermez; orada eski tarayıcı depolaması kullanılır. STL yerel dosya görüntüleme statik arayüzde de çalışabilir.
+Etsy anahtarları, OAuth tokenları ve güncel snapshot ayrı `connection.json` içinde kalır; pazar kaydının asıl deposu `workspace.json` olmuştur; şifreli değildir ve paylaşılmamalıdır. ZIP değişimi bu dosyaları değiştirmez. Statik GitHub Pages önizlemesi yerel API/depo içermez; orada eski tarayıcı depolaması kullanılır. STL yerel dosya görüntüleme statik arayüzde de çalışabilir.
 
 ## Doğrulama ve sonraki değerlendirme
 
-`npm test` geçmiş, karar, otomatik sonuç, pazar, STL ve gerçek HTTP depo akışını doğrular. Ayrıca Chromium’da kayıt taşıma/koruma, sonuç okuma, dosya Worker/görüntüleme/aynı içerik, müşteri konu önerisi, statik önizleme ve 320–1440 piksel kullanım akışları kontrol edilir. Windows COM kısayolu bu Linux ortamında çalıştırılamaz.
+`npm test` geçmiş, karar, otomatik sonuç, pazar, STL, ilan araştırması ve gerçek HTTP depo akışını doğrular. Kalıcı Chromium kontrolleri önceki teslim/STL akışları yanında yeni araştırma, manuel aktarım, AI önizlemesi, sürüm dayanağı ve yeniden açılışı kapsar. Son çalıştırmanın sonucu [UPGRADE_STATUS.md](UPGRADE_STATUS.md) içinde tutulur; test varlığı başarılı son çalıştırma yerine geçmez. Windows COM kısayolu bu Linux ortamında çalıştırılamaz.
 
 Genel ürün değerlendirmesi, ulaşılabilen/engellenen araştırma kaynakları ve kalan eksikler [REVIEW.md](REVIEW.md) içinde. Yeni özellik sayısı başarı ölçüsü değildir; hedef daha az tekrar kayıt ve daha sağlam ürün kararlarıdır.

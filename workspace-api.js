@@ -10,13 +10,16 @@ async function handleWorkspace(req,res,url){
   if(req.method!=='POST'){respond(404,{error:'Bulunamadı'});return;}
   const chunks=[];let bytes=0;for await(const chunk of req){bytes+=chunk.length;if(bytes>32*1024*1024)throw Error('Yedek en fazla 32 MB olmalı.');chunks.push(chunk);}
   const input=JSON.parse(Buffer.concat(chunks).toString('utf8'));
-  if(url.pathname==='/api/workspace'){respond(200,store.put(input.state,input.revision));return;}
+  if(url.pathname==='/api/workspace'){respond(200,store.put(input.state,input.revision,input.shopId));return;}
   if(url.pathname==='/api/workspace/migrate'){respond(200,store.migrate(input.state));return;}
   if(url.pathname==='/api/workspace/dismiss'){respond(200,store.dismiss(input.id,input.revision));return;}
+  if(url.pathname==='/api/workspace/claim-legacy'){respond(200,store.claimLegacy(input.id,input.shopId,input.revision));return;}
   if(url.pathname==='/api/workspace/restore'){
    const etsy=require('./etsy');if(!etsy.canRestore())throw Error('Güncelleme sürüyor; tamamlandıktan sonra geri yükle.');
    const value=input.name?store.readBackup(input.name):input.bundle;
-   const result=store.restore(value,input.revision);etsy.restoreResearch(result.research);respond(200,result);return;
+   // Research is part of the same atomic workspace commit. No second connection
+   // write can leave a successful restore only partly applied.
+   const account=etsy.status();const result=store.restore(value,input.revision,account.connected&&account.shopId?account.shopId:undefined);respond(200,result);return;
   }
   respond(404,{error:'Bulunamadı'});
  }catch(e){respond(e.status||400,{error:e.message});}

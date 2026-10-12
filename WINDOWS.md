@@ -1,4 +1,20 @@
-## 1.5.0 — Tek sürümde günlük çalışma alanı
+## 1.7.0 — Araştırmadan ilan hazırlama ve Drive üzerinden TXT teslimi
+
+Güncel açılış yönergesi **RUN_LATEST.md** içindedir. Eski sunucu penceresini kapat, `STL-Atolyesi-1.7.0.zip` dosyasını yeni bir klasöre çıkar ve `windows-start.cmd` aç. Node.js 20+ dışında yeni çalışma bağımlılığı veya ücretli hizmet yok. Temiz paket ve tarayıcı doğrulamasının sonucu **UPGRADE_STATUS.md** içindedir; Windows `.cmd` çalıştırması bu Linux ortamında denenmedi.
+
+Mevcut kayıtlar ve Etsy bağlantısı aynı Windows kullanıcısının `%LOCALAPPDATA%\STLNicheLab` klasöründe korunur; bu klasörü silme. Eski tarayıcı verisinin mağazası bilinmiyorsa ayrı eski kayıt olarak saklanır. Yalnızca sana ait olduğunu doğruladığın kaydı bağlı mağazaya bir kez ata; başka mağazaya otomatik taşınmaz. Her bilgisayar kendi mağazasına ait ayrı yerel depo kullanır.
+
+**Teslim ve hazırlık**: Etsy ürününe Drive klasörünü bir kez bağla veya mevcut TXT'leri seçip ilan/klasör eşleştirmesini doğrula. Ürüne özel TXT'yi önizle, sürüm olarak sakla ve indir. TXT'yi Etsy'ye yüklemeyi sen yaparsın. Etsy ilan URL'si teslim bağlantısı değildir. Google OAuth bu akış için zorunlu değil.
+
+**İlan taslakları**: Teslim paragrafı, başlık/açıklama/etiket hazırlığı, önce/sonra ve yerel geri alma. **Bugün → Günlük kontrol**: Salt okunur Etsy eşitlemesi, sınırlı oturumsuz klasör kontrolü ve ilk üç gerekçeli iş. Gerçek ilan, Drive paylaşımı veya müşteri mesajı kendiliğinden değiştirilmez.
+
+**Araştırmadan İlan Hazırla**: Mevcut ürünü seç veya Etsy ilan kimliği olmayan yerel ürün oluştur. Eksik ürün bilgisini bir kez tamamla; kelime adaylarını araştır. Marketplace Insights ekranından metin/tablo aktarımını önizle ve doğrula. Mevcut Etsy pazar gözlemini yeniden kullanabilir veya bağlı API'den sınırlı ilan örneklemi alabilirsin. Karşılaştırıp hedef kelimeleri seç; İngilizce başlık/etiket/açıklamayı yerel taslak olarak sakla, kopyala veya dışa aktar. Araştırma ve her taslağın kaynak dayanağı yeniden açılışta korunur. İsteğe bağlı ChatGPT aktarımı ücretsizdir; uygulama AI API çağırmaz.
+
+Klasör sayfasının açılması dosya indirme/içerik/geometri kanıtı değildir. Gerçek yerel STL önizlemesi ve PNG isteğe bağlıdır; bütün arşiv indirilmez. Satış günü arşivi şimdilik UTC, arayüz zaman damgaları İstanbul saatidir. Tam doğrulama/sınırlar **UPGRADE_STATUS.md**, açık işler **NEXT_STEPS.md** içindedir.
+
+---
+
+## 1.5.0 — Önceki sürümün kurulum kaydı
 
 Önce eski uygulamadan JSON yedek indir. Eski sunucu penceresini kapat, yeni ZIP’i ayrı klasöre çıkar ve `windows-start.cmd` dosyasını çalıştır. İlk açılışı eski kayıtlarının bulunduğu **aynı tarayıcıda, http://localhost:3000 adresinde** yap. Eski tarayıcı kayıtları ortak yerel depoya otomatik taşınır. İlk açılışı başka tarayıcıda yaptıysan eski tarayıcıdan da bir kez aç; farklı eski kayıtlar mevcut depoyu ezmeden otomatik yedek olarak korunur. Ayarlar’dan yedek seçebilirsin.
 
@@ -16,7 +32,7 @@ Müşteri mesajlarına otomatik erişim yok. Konu önerisi anahtar kelimelerle �
 
 ---
 
-Aşağıdaki önceki sürüm notları tarihsel kurulum ayrıntılarıdır. Güncel veri deposu ve kullanım için yukarıdaki 1.5.0 bölümü geçerlidir.
+Aşağıdaki önceki sürüm notları tarihsel kurulum ayrıntılarıdır. Güncel kullanım için yukarıdaki 1.7.0 bölümü ve RUN_LATEST.md geçerlidir.
 
 # Windows'ta baslatma
 
